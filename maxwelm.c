@@ -70,9 +70,11 @@ void add_window(Window new_win)
         newclient->prev = NULL;
         head = newclient;
     } else {
-        for (tmp = head; tmp->next; tmp = tmp->next);
+        for (tmp = head; tmp->next; tmp = tmp->next)
+            if (tmp == current)
+                break;
 
-        newclient->next = NULL;
+        newclient->next = tmp->next;
         newclient->prev = tmp;
         
         tmp->next = newclient;
@@ -270,6 +272,7 @@ void maprequest(XEvent *ev)
     XMapRequestEvent *mapev = &ev->xmaprequest;
     add_window(mapev->window);
     XMapWindow(dpy, mapev->window);
+    update_all_titles();
     update_all_windows();
 }
 

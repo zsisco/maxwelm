@@ -16,7 +16,7 @@ To do:
    [X] current/focus window? 
        mouse-focus no longer functional, focus only through tabbing
        can still interactive move/resize and raise window (no focus) with mouse
-   [ ] add_window() add AFTER CURRENT client in list
+   [X] add_window() add AFTER CURRENT client in list
    [ ] Alt + r - set current window
    [ ] Alt + m - toggle?
    [ ] auto maximize windows?
