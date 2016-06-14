@@ -1,0 +1,27 @@
+To do:
+   [X] break main into functions
+   [X] grab keys and key config
+   [X] switch to event-driven loop 
+   [X] vi-hotkeys for resizing window
+   [X] vi-hotkeys for moving window
+   [X] get window name
+   [X] window name update function
+   [X] put windows in linked list, test this
+    [X] add
+    [X] remove
+    [X] next
+    [X] prev
+   [X] kill client
+   [X] rewrite keypress() for linked list windows (i.e. current)
+   [X] current/focus window? 
+       mouse-focus no longer functional, focus only through tabbing
+       can still interactive move/resize and raise window (no focus) with mouse
+   [ ] add_window() add AFTER CURRENT client in list
+   [ ] Alt + r - set current window
+   [ ] Alt + m - toggle?
+   [ ] auto maximize windows?
+   [ ] maximize mode?
+   [ ] change spawn location of windows (MapRequest?)
+   [ ] signal? why?
+   [ ] draw bar on screen
+   [ ] custom status text (PropertyNotify?)
