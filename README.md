@@ -1,6 +1,6 @@
 # maxwelm (Maximizing Window Element Manager)
 
-maxwelm is written by Zach Sisco <sisco.z.d@gmail.com> in 2016.
+maxwelm is written by Zach Sisco `<sisco.z.d@gmail.com>` in 2016.
 
 This software is in the public domain and is provided AS IS, with NO WARRANTY.
 
