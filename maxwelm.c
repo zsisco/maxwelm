@@ -22,16 +22,6 @@
 
 enum direction {LEFT, DOWN, UP, RIGHT};
 
-/*
-enum wm_command {MOVE_L, MOVE_D, MOVE_U, MOVE_R,
-                 RESIZE_L, RESIZE_D, RESIZE_U, RESIZE_R,
-                 RAISE_WIN, MAX_WIN, CLOSE_WIN, 
-                 NEXT_WIN, PREV_WIN, DESK_1, DESK_2, 
-                 DESK_3, DESK_4, DESK_5, DESK_6, DESK_7,
-                 DESK_8, DESK_9, MOVEDESK_1, MOVEDESK_2, 
-                 SPAWN, QUIT_WM, NOP};
-*/
-
 typedef union {
     const char** com;
     const int i;
@@ -67,6 +57,7 @@ static void client_to_desktop(const Arg arg);
 static void close_win();
 static void configurerequest(XEvent *e);
 static void destroynotify(XEvent *ev);
+static void drawbar();
 static unsigned long getcolor(const char* color);
 static void grabinput();
 static void keypress(XEvent *ev);
@@ -83,6 +74,7 @@ static void run();
 static void save_desktop(int d);
 static void select_desktop(int d);
 static void send_kill_signal(Window w);
+static GC setcolor(const char* col);
 static void setup();
 static void sigchld(int unused);
 static void spawn(const Arg arg);
@@ -92,6 +84,8 @@ static void update_title(struct client *c);
 
 /* variables */
 static XWindowAttributes attr;
+static Colormap cmap;
+static XColor color;
 static unsigned int color_focus;
 static unsigned int color_unfocus;
 static unsigned int color_status;
@@ -99,6 +93,7 @@ static struct client *current;
 static unsigned int currentdesktop;
 static struct desktop desktops[10];
 static Display *dpy;
+static GC gc;
 static void (*handler[LASTEvent]) (XEvent *) = {
 	[ButtonPress] = buttonpress,
 	[ButtonRelease] = buttonrelease,
@@ -114,6 +109,7 @@ static int screen;
 static int screen_w;
 static int screen_h;
 static XButtonEvent start;
+static char status_text[256];
 
 /* include config here to use structs defined above */
 #include "config.h"
@@ -259,6 +255,16 @@ void destroynotify(XEvent *ev)
     update_all_windows();
 }
 
+void drawbar()
+{
+    Window win = XCreateSimpleWindow(dpy, root, 0, 0, screen_w, 15, 0, color_unfocus, color_unfocus);
+	XMapWindow(dpy, win);
+	XDrawRectangle(dpy, win, setcolor(UNFOCUS), 0, 0, screen_w, 14);
+	XFillRectangle(dpy, win, setcolor(UNFOCUS), 0, 0, screen_w, 15);
+
+    XSync(dpy, False);
+}
+
 unsigned long getcolor(const char* color)
 {
     XColor c;
@@ -293,131 +299,13 @@ void grabinput()
 void keypress(XEvent *ev)
 {
     KeySym keysym = XkbKeycodeToKeysym(dpy, ev->xkey.keycode, 0, 0);
-    /*enum wm_command cmd = NOP;*/
     int i;
     for (i = 0; i < LENGTH(keys); ++i) {
         if (keys[i].keysym == keysym && keys[i].mod == ev->xkey.state) {
             keys[i].function(keys[i].arg);
-            /*cmd = keys[i].wm_cmd;*/
             break;
         }
     }
-
-    /*
-    switch (cmd) {
-    case MOVE_L:
-        if (current != NULL && current->win != None && ev->xkey.state == (1<<3)) {
-            XGetWindowAttributes(dpy, current->win, &attr);
-            XMoveWindow(dpy, current->win, MAX(1, attr.x - RESIZER), attr.y);
-        }
-        break;
-    case MOVE_D:
-        if (current != NULL && current->win != None && ev->xkey.state == (1<<3)) {
-            XGetWindowAttributes(dpy, current->win, &attr);
-            XMoveWindow(dpy, current->win, attr.x, 
-                    (screen_h - attr.height < attr.y + RESIZER ? screen_h - attr.height: attr.y + RESIZER));
-        }
-        break;
-    case MOVE_U:
-        if (current != NULL && current->win != None && ev->xkey.state == (1<<3)) {
-            XGetWindowAttributes(dpy, current->win, &attr);
-            XMoveWindow(dpy, current->win, attr.x, MAX(1, attr.y - RESIZER));
-        }
-        break;
-    case MOVE_R:
-        if (current != NULL && current->win != None && ev->xkey.state == (1<<3)) {
-            XGetWindowAttributes(dpy, current->win, &attr);
-            XMoveWindow(dpy, current->win, 
-                    (screen_w - attr.width < attr.x + RESIZER ? screen_w - attr.width : attr.x + RESIZER),
-                    attr.y);
-        }
-        break;
-    case RESIZE_L:
-        if (current != NULL && current->win != None) {
-            XGetWindowAttributes(dpy, current->win, &attr);
-            XResizeWindow(dpy, current->win, MAX(1, attr.width - RESIZER), attr.height);
-        }
-        break;
-    case RESIZE_D:
-        if (current != NULL && current->win != None) {
-            XGetWindowAttributes(dpy, current->win, &attr);
-            XResizeWindow(dpy, current->win, attr.width, 
-                    (screen_h - attr.y < attr.height + RESIZER ? screen_h - attr.y: attr.height + RESIZER));
-        }
-        break;
-    case RESIZE_U:
-        if (current != NULL && current->win != None) {
-            XGetWindowAttributes(dpy, current->win, &attr);
-            XResizeWindow(dpy, current->win, attr.width, MAX(1, attr.height - RESIZER));
-        }
-        break;
-    case RESIZE_R:
-        if (current != NULL && current->win != None) {
-            XGetWindowAttributes(dpy, current->win, &attr);
-            XResizeWindow(dpy, current->win, 
-                    (screen_w - attr.x < attr.width + RESIZER ? screen_w - attr.x : attr.width + RESIZER),
-                    attr.height);
-        }
-        break;
-    case RAISE_WIN:
-        if (ev->xkey.subwindow != None && ev->xkey.state == (1<<3)) {
-            XRaiseWindow(dpy, ev->xkey.subwindow);
-        }
-        break;
-    case MAX_WIN:
-        if (current != NULL && current->win != None && ev->xkey.state == (1<<3)) 
-            XMoveResizeWindow(dpy, current->win, 0, 5, screen_w - 2, screen_h - 20);
-        break;
-    case CLOSE_WIN:
-        close_win();
-        break;
-    case NEXT_WIN:
-        next_win();
-        break;
-    case PREV_WIN:
-        prev_win();
-        break;
-    case DESK_1:
-        change_desktop(0);
-        break;
-    case DESK_2:
-        change_desktop(1);
-        break;
-    case DESK_3:
-        change_desktop(2);
-        break;
-    case DESK_4:
-        change_desktop(3);
-        break;
-    case DESK_5:
-        change_desktop(4);
-        break;
-    case DESK_6:
-        change_desktop(5);
-        break;
-    case DESK_7:
-        change_desktop(6);
-        break;
-    case DESK_8:
-        change_desktop(7);
-        break;
-    case DESK_9:
-        change_desktop(8);
-        break;
-    case MOVEDESK_1:
-        client_to_desktop(0);
-        break;
-    case MOVEDESK_2:
-        client_to_desktop(1);
-        break;
-    case SPAWN:
-        spawn(keys[i].arg);
-        break;
-    case QUIT_WM:
-        break;
-    default:
-        break;
-    }*/
 }
 
 void maprequest(XEvent *ev)
@@ -624,6 +512,13 @@ void send_kill_signal(Window w)
     XSendEvent(dpy, w, False, NoEventMask, &ke);
 }
 
+GC setcolor(const char* col) 
+{
+	XAllocNamedColor(dpy, cmap, col, &color, &color);
+	XSetForeground(dpy, gc, color.pixel);
+	return gc;
+}
+
 void setup() 
 {
     sigchld(0); 
@@ -632,10 +527,6 @@ void setup()
     screen_w = XDisplayWidth(dpy, screen);
     screen_h = XDisplayHeight(dpy, screen);
     root = RootWindow(dpy,screen);
-
-    color_focus = getcolor(FOCUS);
-    color_unfocus = getcolor(UNFOCUS);
-    color_status = getcolor(STATUS);
 
     grabinput();
 
@@ -652,6 +543,18 @@ void setup()
     const Arg arg = {.i = 1};
     currentdesktop = arg.i;
     change_desktop(arg);
+
+    /* init color stuff */
+    color_focus = getcolor(FOCUS);
+    color_unfocus = getcolor(UNFOCUS);
+    color_status = getcolor(STATUS);
+    cmap = DefaultColormap(dpy, screen);
+    XGCValues val;
+    val.font = XLoadFont(dpy, "fixed");
+    gc = XCreateGC(dpy, root, GCFont, &val);
+
+    strncpy(status_text, "maxwelm\0", sizeof(status_text));
+    drawbar();
 
     XSelectInput(dpy,root,SubstructureNotifyMask|SubstructureRedirectMask|PropertyChangeMask);
 }

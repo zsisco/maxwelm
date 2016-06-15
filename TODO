@@ -24,7 +24,7 @@ To do:
    [ ] maximize mode?
    [ ] signal? why?
    [ ] draw bar on screen
-    [ ] alternative: only draw while holding Alt+Tab
-    [ ] alternative: BYOB
+    [ ] status bar 
    [ ] custom status text (PropertyNotify)
+    [ ] also, transient windows
    [X] virtual desktops
