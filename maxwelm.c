@@ -20,6 +20,9 @@
 #define LENGTH(X) (sizeof(X) / sizeof(*X))
 #define RESIZER 15
 
+enum direction {LEFT, DOWN, UP, RIGHT};
+
+/*
 enum wm_command {MOVE_L, MOVE_D, MOVE_U, MOVE_R,
                  RESIZE_L, RESIZE_D, RESIZE_U, RESIZE_R,
                  RAISE_WIN, MAX_WIN, CLOSE_WIN, 
@@ -27,16 +30,18 @@ enum wm_command {MOVE_L, MOVE_D, MOVE_U, MOVE_R,
                  DESK_3, DESK_4, DESK_5, DESK_6, DESK_7,
                  DESK_8, DESK_9, MOVEDESK_1, MOVEDESK_2, 
                  SPAWN, QUIT_WM, NOP};
+*/
 
 typedef union {
     const char** com;
     const int i;
+    const enum direction dir;
 } Arg;
 
 struct key {
     unsigned int mod;
     KeySym keysym;
-    enum wm_command wm_cmd;
+    void (*function)(const Arg arg);
     const Arg arg;
 };
 
@@ -57,7 +62,8 @@ struct desktop {
 static void add_window(Window w);
 static void buttonpress(XEvent *ev);
 static void buttonrelease(XEvent *ev);
-static void change_desktop(int d);
+static void change_desktop(const Arg arg);
+static void client_to_desktop(const Arg arg);
 static void close_win();
 static void configurerequest(XEvent *e);
 static void destroynotify(XEvent *ev);
@@ -65,10 +71,14 @@ static unsigned long getcolor(const char* color);
 static void grabinput();
 static void keypress(XEvent *ev);
 static void maprequest(XEvent *ev);
+static void max_win();
 static void motionnotify(XEvent *ev);
+static void move_win(const Arg arg);
 static void next_win();
 static void prev_win();
+static void quit_wm();
 static void remove_window(Window w);
+static void resize_win(const Arg arg);
 static void run();
 static void save_desktop(int d);
 static void select_desktop(int d);
@@ -87,7 +97,7 @@ static unsigned int color_unfocus;
 static unsigned int color_status;
 static struct client *current; 
 static unsigned int currentdesktop;
-static struct desktop desktops[9];
+static struct desktop desktops[10];
 static Display *dpy;
 static void (*handler[LASTEvent]) (XEvent *) = {
 	[ButtonPress] = buttonpress,
@@ -155,8 +165,9 @@ void buttonrelease(XEvent *ev)
     start.subwindow = None;
 }
 
-void change_desktop(int d)
+void change_desktop(const Arg arg)
 {
+    int d = arg.i;
     struct client *c;
 
     if (d == currentdesktop)
@@ -177,8 +188,9 @@ void change_desktop(int d)
     update_all_windows();
 }
 
-void client_to_desktop(int d)
+void client_to_desktop(const Arg arg)
 {
+    int d = arg.i;
     struct client *movec = current;
     int orig_desktop = currentdesktop;
 
@@ -277,19 +289,21 @@ void grabinput()
             ButtonPressMask|ButtonReleaseMask|PointerMotionMask, GrabModeAsync, GrabModeAsync, None, None);
 }
 
+
 void keypress(XEvent *ev)
 {
     KeySym keysym = XkbKeycodeToKeysym(dpy, ev->xkey.keycode, 0, 0);
-
-    enum wm_command cmd = NOP;
+    /*enum wm_command cmd = NOP;*/
     int i;
     for (i = 0; i < LENGTH(keys); ++i) {
         if (keys[i].keysym == keysym && keys[i].mod == ev->xkey.state) {
-            cmd = keys[i].wm_cmd;
+            keys[i].function(keys[i].arg);
+            /*cmd = keys[i].wm_cmd;*/
             break;
         }
     }
 
+    /*
     switch (cmd) {
     case MOVE_L:
         if (current != NULL && current->win != None && ev->xkey.state == (1<<3)) {
@@ -348,7 +362,6 @@ void keypress(XEvent *ev)
     case RAISE_WIN:
         if (ev->xkey.subwindow != None && ev->xkey.state == (1<<3)) {
             XRaiseWindow(dpy, ev->xkey.subwindow);
-            /* set to current... don't bother unless I really want this */
         }
         break;
     case MAX_WIN:
@@ -404,7 +417,7 @@ void keypress(XEvent *ev)
         break;
     default:
         break;
-    }
+    }*/
 }
 
 void maprequest(XEvent *ev)
@@ -420,10 +433,15 @@ void maprequest(XEvent *ev)
     add_window(mapev->window);
     /* Map window and maximize, true to name */
     XMapWindow(dpy, mapev->window);
-    if (current != NULL && current->win != None) 
-        XMoveResizeWindow(dpy, current->win, 0, 5, screen_w - 2, screen_h - 20);
+    max_win();
     update_all_titles();
     update_all_windows();
+}
+
+void max_win()
+{
+    if (current != NULL && current->win != None) 
+        XMoveResizeWindow(dpy, current->win, 0, 5, screen_w - 2, screen_h - 20);
 }
 
 void motionnotify(XEvent *ev)
@@ -437,6 +455,37 @@ void motionnotify(XEvent *ev)
             attr.y + (start.button==1 ? ydiff : 0),
             MAX(1, attr.width + (start.button==3 ? xdiff : 0)),
             MAX(1, attr.height + (start.button==3 ? ydiff : 0)));
+    }
+}
+
+void move_win(const Arg arg)
+{
+    static int x, y;
+    enum direction dir = arg.dir;
+
+    if (current != NULL && current->win != None) {
+        XGetWindowAttributes(dpy, current->win, &attr);
+        switch (dir) {
+        case LEFT:
+            x = MAX(1, attr.x - RESIZER);
+            y = attr.y;
+            break;
+        case DOWN:
+            x = attr.x;
+            y = (screen_h - attr.height < attr.y + RESIZER ? screen_h - attr.height: attr.y + RESIZER);
+            break;
+        case UP:
+            x = attr.x;
+            y = MAX(1, attr.y - RESIZER);
+            break;
+        case RIGHT:
+            x = (screen_w - attr.width < attr.x + RESIZER ? screen_w - attr.width : attr.x + RESIZER);
+            y = attr.y;
+            break;
+        default:
+            break;
+        }
+        XMoveWindow(dpy, current->win, x, y);
     }
 }
 
@@ -470,6 +519,11 @@ void prev_win()
     }
 }
 
+void quit_wm()
+{
+    fprintf(stdout, "quitting...jk nm\n");
+}
+
 void remove_window(Window w)
 {
     struct client *c;
@@ -497,6 +551,37 @@ void remove_window(Window w)
             free(c);
             return;
         }
+    }
+}
+
+void resize_win(const Arg arg)
+{
+    static int w, h;
+    enum direction dir = arg.dir;
+
+    if (current != NULL && current->win != None) {
+        XGetWindowAttributes(dpy, current->win, &attr);
+        switch (dir) {
+        case LEFT:
+            w = MAX(1, attr.width - RESIZER);
+            h = attr.height;
+            break;
+        case DOWN:
+            w = attr.width;
+            h = (screen_h - attr.y < attr.height + RESIZER ? screen_h - attr.y: attr.height + RESIZER);
+            break;
+        case UP:
+            w = attr.width;
+            h = MAX(1, attr.height - RESIZER);
+            break;
+        case RIGHT:
+            w = (screen_w - attr.x < attr.width + RESIZER ? screen_w - attr.x : attr.width + RESIZER);
+            h = attr.height;
+            break;
+        default:
+            break;
+        }
+        XResizeWindow(dpy, current->win, w, h);
     }
 }
 
@@ -558,14 +643,15 @@ void setup()
     current = NULL;
 
     int i;
-    for (i = 0; i < 9; i++) {
+    for (i = 0; i < 10; i++) {
         desktops[i].head = head;
         desktops[i].current = current;
     }
 
     /* Select first desktop as default */
-    currentdesktop = 0;
-    change_desktop(currentdesktop);
+    const Arg arg = {.i = 1};
+    currentdesktop = arg.i;
+    change_desktop(arg);
 
     XSelectInput(dpy,root,SubstructureNotifyMask|SubstructureRedirectMask|PropertyChangeMask);
 }
@@ -632,7 +718,7 @@ void update_title(struct client *c)
 {
     char *wname = NULL;
     if (XFetchName(dpy, c->win, &wname) > 0) {
-        fprintf(stdout, "[%s]", wname);
+        fprintf(stdout, "[%d|%s]", currentdesktop, wname);
         strncpy(c->name, wname, sizeof(c->name));
         XFree(wname);
     }

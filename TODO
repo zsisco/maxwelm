@@ -20,13 +20,11 @@ To do:
    [X] auto maximize windows
    [X] change spawn location of windows (MapRequest, by virtue of item above)
    [ ] graceful quit WM
-   [ ] Alt + r - set current window
    [ ] Alt + m - toggle?
    [ ] maximize mode?
    [ ] signal? why?
    [ ] draw bar on screen
     [ ] alternative: only draw while holding Alt+Tab
     [ ] alternative: BYOB
-   [ ] custom status text (PropertyNotify?)
-   [ ] virtual desktops
-   [ ] change to saner keypress function
+   [ ] custom status text (PropertyNotify)
+   [X] virtual desktops
