@@ -6,12 +6,6 @@
  * Borrowed interactive pointer move/resize code from TinyWM. 
  */
 
-/* TinyWM is written by Nick Welch <mack@incise.org>, 2005.
- *
- * This software is in the public domain
- * and is provided AS IS, with NO WARRANTY. */
-
-
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,7 +24,8 @@ enum wm_command {MOVE_L, MOVE_D, MOVE_U, MOVE_R,
                  RESIZE_L, RESIZE_D, RESIZE_U, RESIZE_R,
                  RAISE_WIN, MAX_WIN, CLOSE_WIN, 
                  NEXT_WIN, PREV_WIN, DESK_1, DESK_2, 
-                 SPAWN, QUIT_WM, NOP};
+                 DESK_3, DESK_4, DESK_5, DESK_6, DESK_7,
+                 DESK_8, DESK_9, SPAWN, QUIT_WM, NOP};
 
 typedef union {
     const char** com;
@@ -50,7 +45,6 @@ struct client {
 
     Window win;
 	char name[256];
-    unsigned int desktop;
 };
 
 struct desktop {
@@ -91,7 +85,7 @@ static unsigned int color_unfocus;
 static unsigned int color_status;
 static struct client *current; 
 static unsigned int currentdesktop;
-static struct desktop desktops[10];
+static struct desktop desktops[9];
 static Display *dpy;
 static void (*handler[LASTEvent]) (XEvent *) = {
 	[ButtonPress] = buttonpress,
@@ -121,7 +115,6 @@ void addwindow(Window new_win)
     }
 
     newclient->win = new_win;
-    newclient->desktop = currentdesktop;
 
     if (head == NULL) {
         newclient->next = NULL;
@@ -340,6 +333,27 @@ void keypress(XEvent *ev)
     case DESK_2:
         change_desktop(1);
         break;
+    case DESK_3:
+        change_desktop(2);
+        break;
+    case DESK_4:
+        change_desktop(3);
+        break;
+    case DESK_5:
+        change_desktop(4);
+        break;
+    case DESK_6:
+        change_desktop(5);
+        break;
+    case DESK_7:
+        change_desktop(6);
+        break;
+    case DESK_8:
+        change_desktop(7);
+        break;
+    case DESK_9:
+        change_desktop(8);
+        break;
     case SPAWN:
         spawn(keys[i].arg);
         break;
@@ -501,7 +515,7 @@ void setup()
     current = NULL;
 
     int i;
-    for (i = 0; i < 10; i++) {
+    for (i = 0; i < 9; i++) {
         desktops[i].head = head;
         desktops[i].current = current;
     }
@@ -575,7 +589,7 @@ void update_title(struct client *c)
 {
     char *wname = NULL;
     if (XFetchName(dpy, c->win, &wname) > 0) {
-        fprintf(stdout, "[%d|%s]", c->desktop, wname);
+        fprintf(stdout, "[%s]", wname);
         strncpy(c->name, wname, sizeof(c->name));
         XFree(wname);
     }
