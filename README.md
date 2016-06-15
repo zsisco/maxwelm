@@ -20,8 +20,8 @@ Alt + m:               maximize focused window
 Alt + Shift + w:       close focused window
 Alt + Tab:             focus next window
 Alt + Shift + Tab:     focus previous window
-Alt + (1 - 9)          focus virtual desktop (1 - 9)
-Alt + Shift + (1 - 9): move focused window to virtual desktop (1 - 9)
+Alt + (0 - 9)          focus virtual desktop (0 - 9)
+Alt + Shift + (0 - 9): move focused window to virtual desktop (0 - 9)
 Alt + Enter:           spawn terminal
 Alt + p:               spawn dmenu
 Alt + Shift + t:       quit

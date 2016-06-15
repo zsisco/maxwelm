@@ -261,17 +261,25 @@ void destroynotify(XEvent *ev)
 
 void drawbar()
 {
+    fprintf(stdout, "\tdrawbar->\n");
+    XSync(dpy, False);
     Window win = XCreateSimpleWindow(dpy, root, 0, 0, screen_w, TOPBAR, 0, color_focus, color_focus);
+    /*fprintf(stdout, "\t          create simple window\n");*/
 	XMapWindow(dpy, win);
+    /*fprintf(stdout, "\t          map window\n");*/
 	XDrawRectangle(dpy, win, setcolor(FOCUS), 0, 0, screen_w, TOPBAR - 1);
+    /*fprintf(stdout, "\t          draw rectangle\n");*/
 	XFillRectangle(dpy, win, setcolor(FOCUS), 0, 0, screen_w, TOPBAR);
+    /*fprintf(stdout, "\t          fill rectangle\n");*/
     
     char desktoptext[4]; 
     snprintf(desktoptext, 4, "[%d]", currentdesktop);
 
-    XDrawString(dpy, win, setcolor(STATUSTXT), 5, TOPBAR - 3, desktoptext, 5);
+    XDrawString(dpy, win, setcolor(STATUSTXT), 5, TOPBAR - 3, desktoptext, strlen(desktoptext));
+    /*fprintf(stdout, "\t          draw string\n");*/
 
     XSync(dpy, False);
+    fprintf(stdout, "\tdrawbar<-\n\n");
 }
 
 unsigned long getcolor(const char* color)

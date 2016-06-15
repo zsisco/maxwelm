@@ -27,6 +27,8 @@ static struct key keys[] = {
     { MOD|ShiftMask,   XK_w,      close_win,         {NULL}},
     { MOD,             XK_Tab,    next_win,          {NULL}},
     { MOD|ShiftMask,   XK_Tab,    prev_win,          {NULL}},
+    { MOD,             XK_0,      change_desktop,    {.i = 0}}, 
+    { MOD|ShiftMask,   XK_0,      client_to_desktop, {.i = 0}},
     { MOD,             XK_1,      change_desktop,    {.i = 1}}, 
     { MOD|ShiftMask,   XK_1,      client_to_desktop, {.i = 1}},
     { MOD,             XK_2,      change_desktop,    {.i = 2}}, 
