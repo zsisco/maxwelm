@@ -26,5 +26,6 @@ To do:
    [ ] signal? why?
    [ ] draw bar on screen
     [ ] alternative: only draw while holding Alt+Tab
+    [ ] alternative: BYOB
    [ ] custom status text (PropertyNotify?)
    [ ] virtual desktops?

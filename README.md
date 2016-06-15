@@ -1,10 +1,8 @@
 # maxwelm (Maximizing Window Element Manager)
 
-maxwelm is written by Zach Sisco `<sisco.z.d@gmail.com>` in 2016.
+maxwelm is written by Zach Sisco `<sisco.z.d@gmail.com>`, 2016.
 
-This software is in the public domain and is provided AS IS, with NO WARRANTY.
-
-Maxwelm is a simple window manager based off of [TinyWM](https://github.com/mackstann/tinywm) and my previous window manager, [ShMOW](https://github.com/zsisco/ShMOW). 
+Maxwelm is a simple window manager based off of [TinyWM](https://github.com/mackstann/tinywm), my previous window manager [ShMOW](https://github.com/zsisco/ShMOW), and [dwm](http://dwm.suckless.org) when I got stuck. 
 The main idea is to have a window manager suitable for small screens (and slower machines) that minimizes clutter and maximizes precious screen real estate.
 All configuration is done in the config.h file. 
 

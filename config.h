@@ -4,37 +4,10 @@
 /* Mod (Mod1 == alt) */
 #define MOD Mod1Mask
 
-#define RESIZER 15
-
 /* Colors */
 #define FOCUS "rgb:1c/1c/1c"
 #define UNFOCUS "rgb:9a/cc/79"
 #define STATUS "rgb:1c/1c/1c"
-
-typedef union {
-    const char** com;
-    const int i;
-} Arg;
-
-enum wm_command {MOVE_L, MOVE_D, MOVE_U, MOVE_R,
-                 RESIZE_L, RESIZE_D, RESIZE_U, RESIZE_R,
-                 RAISE_WIN, MAX_WIN, CLOSE_WIN, 
-                 NEXT_WIN, PREV_WIN, SPAWN, QUIT_WM, NOP};
-
-struct key {
-    unsigned int mod;
-    KeySym keysym;
-    enum wm_command wm_cmd;
-    const Arg arg;
-};
-
-struct client{
-    struct client *next;
-    struct client *prev;
-
-    Window win;
-	char name[256];
-};
 
 const char* dmenucmd[] = {"dmenu_run",NULL};
 const char* termcmd[]  = {"urxvt",NULL};

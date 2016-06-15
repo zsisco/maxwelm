@@ -1,27 +1,60 @@
 /*
  * maxwelm - Maximizing Window element Manager
  * 
- * Maxwelm is written by Zach Sisco <sisco.z.d@gmail.com> in 2016.
- * This software is in the public domain
- * and is provided AS IS, with NO WARRANTY.
+ * Maxwelm is written by Zach Sisco <sisco.z.d@gmail.com>, 2016.
+ * 
+ * Borrowed interactive pointer move/resize code from TinyWM. 
  */
 
-#include <X11/Xlib.h>
-#include <X11/XKBlib.h>
-#include <X11/keysym.h>
+/* TinyWM is written by Nick Welch <mack@incise.org>, 2005.
+ *
+ * This software is in the public domain
+ * and is provided AS IS, with NO WARRANTY. */
+
+
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <signal.h>
 #include <sys/wait.h>
-#include "config.h"
+#include <X11/keysym.h>
+#include <X11/Xlib.h>
+#include <X11/XKBlib.h>
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
-#define TABLELENGTH(X) (sizeof(X) / sizeof(*X))
+#define LENGTH(X) (sizeof(X) / sizeof(*X))
+#define RESIZER 15
 
-static void add_window(Window w);
+enum wm_command {MOVE_L, MOVE_D, MOVE_U, MOVE_R,
+                 RESIZE_L, RESIZE_D, RESIZE_U, RESIZE_R,
+                 RAISE_WIN, MAX_WIN, CLOSE_WIN, 
+                 NEXT_WIN, PREV_WIN, SPAWN, QUIT_WM, NOP};
+
+typedef union {
+    const char** com;
+    const int i;
+} Arg;
+
+struct key {
+    unsigned int mod;
+    KeySym keysym;
+    enum wm_command wm_cmd;
+    const Arg arg;
+};
+
+struct client{
+    struct client *next;
+    struct client *prev;
+
+    Window win;
+	char name[256];
+};
+
+/* declare functions */
+static void addwindow(Window w);
 static void buttonpress(XEvent *ev);
+static void buttonrelease(XEvent *ev);
 static void close_win();
 static void destroynotify(XEvent *ev);
 static unsigned long getcolor(const char* color);
@@ -41,6 +74,7 @@ static void update_all_titles();
 static void update_all_windows();
 static void update_title(struct client *c);
 
+/* variables */
 static Display *dpy;
 static XWindowAttributes attr;
 static XButtonEvent start;
@@ -53,8 +87,19 @@ static struct client *current;
 static unsigned int color_focus;
 static unsigned int color_unfocus;
 static unsigned int color_status;
+static void (*handler[LASTEvent]) (XEvent *) = {
+	[ButtonPress] = buttonpress,
+	[ButtonRelease] = buttonrelease,
+	[DestroyNotify] = destroynotify,
+	[KeyPress] = keypress,
+	[MapRequest] = maprequest,
+	[MotionNotify] = motionnotify
+};
 
-void add_window(Window new_win)
+/* include config here to use structs defined above */
+#include "config.h"
+
+void addwindow(Window new_win)
 {
     struct client *newclient, *tmp;
 
@@ -91,6 +136,11 @@ void buttonpress(XEvent *ev)
         XGetWindowAttributes(dpy, ev->xbutton.subwindow, &attr);
         start = ev->xbutton;
     }
+}
+
+void buttonrelease(XEvent *ev)
+{
+    start.subwindow = None;
 }
 
 void close_win()
@@ -147,7 +197,7 @@ void grabinput()
     int i;
     KeyCode code;
 
-    for (i = 0; i < TABLELENGTH(keys); ++i) {
+    for (i = 0; i < LENGTH(keys); ++i) {
         if ((code = XKeysymToKeycode(dpy, keys[i].keysym))) {
             XGrabKey(dpy, code, keys[i].mod, root, True, GrabModeAsync, GrabModeAsync);
         }
@@ -165,7 +215,7 @@ void keypress(XEvent *ev)
 
     enum wm_command cmd = NOP;
     int i;
-    for (i = 0; i < TABLELENGTH(keys); ++i) {
+    for (i = 0; i < LENGTH(keys); ++i) {
         if (keys[i].keysym == keysym && keys[i].mod == ev->xkey.state) {
             cmd = keys[i].wm_cmd;
             break;
@@ -258,8 +308,15 @@ void keypress(XEvent *ev)
 
 void maprequest(XEvent *ev)
 {
+    static XWindowAttributes wa;
     XMapRequestEvent *mapev = &ev->xmaprequest;
-    add_window(mapev->window);
+
+    if (!XGetWindowAttributes(dpy, mapev->window, &wa))
+        return;
+    if (wa.override_redirect) /* for popups/dialogs */
+        return;
+
+    addwindow(mapev->window);
     /* Map window and maximize, true to name */
     XMapWindow(dpy, mapev->window);
     if (current != NULL && current->win != None) 
@@ -348,34 +405,12 @@ void run()
 
     start.subwindow = None;
 
-    while (!XNextEvent(dpy, &ev)) {
-        switch (ev.type) {
-        case KeyPress:
-            keypress(&ev);
-            break;
-        case MapRequest:
-            maprequest(&ev);
-            break;
-        case ButtonPress:
-            buttonpress(&ev);
-            break;
-        case DestroyNotify:
-            destroynotify(&ev);
-            break;
-        case MotionNotify:
-            motionnotify(&ev);
-            break;
-        case ButtonRelease:
-            start.subwindow = None;
-            break;
-        default:
-            break; 
-        }
-        /* DON'T PUT THIS HERE. IT FUCKS UP CLOSING WINDOWS.
-        update_all_titles();
-        update_all_windows();
-        */
-    }
+	XSync(dpy, False);
+
+	/* Credit to dwm for the O(1)-time event loop */
+	while (!XNextEvent(dpy, &ev))
+		if (handler[ev.type])
+			handler[ev.type](&ev); /* call handler */
 }
 
 void send_kill_signal(Window w)
@@ -411,6 +446,7 @@ void setup()
     XSelectInput(dpy,root,SubstructureNotifyMask|SubstructureRedirectMask|PropertyChangeMask);
 }
 
+/* Credit to dwm for this */
 void sigchld(int unused) 
 {
 	if (signal(SIGCHLD, sigchld) == SIG_ERR) {
@@ -462,7 +498,6 @@ void update_all_windows()
             XSetInputFocus(dpy, c->win, RevertToParent, CurrentTime);
             XRaiseWindow(dpy, c->win);
             /*drawbar();*/
-            /*fprintf(stdout, "\tcurrent name: %s\n", c->name);*/
         } else {
             XSetWindowBorder(dpy, c->win, color_unfocus);
         }
@@ -473,7 +508,7 @@ void update_title(struct client *c)
 {
     char *wname = NULL;
     if (XFetchName(dpy, c->win, &wname) > 0) {
-        fprintf(stdout, "[ %s ]", wname);
+        fprintf(stdout, "[%s]", wname);
         strncpy(c->name, wname, sizeof(c->name));
         XFree(wname);
     }
