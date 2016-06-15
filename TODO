@@ -21,6 +21,7 @@ To do:
    [X] change spawn location of windows (MapRequest, by virtue of item above)
    [ ] graceful quit WM
    [ ] Alt + m - toggle?
+       If max then no border, else border
    [ ] maximize mode?
    [ ] signal? why?
    [ ] draw bar on screen

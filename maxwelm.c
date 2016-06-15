@@ -19,6 +19,7 @@
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define LENGTH(X) (sizeof(X) / sizeof(*X))
 #define RESIZER 15
+#define TOPBAR 15
 
 enum direction {LEFT, DOWN, UP, RIGHT};
 
@@ -182,6 +183,7 @@ void change_desktop(const Arg arg)
             XMapWindow(dpy, c->win);
 
     update_all_windows();
+    drawbar();
 }
 
 void client_to_desktop(const Arg arg)
@@ -203,6 +205,7 @@ void client_to_desktop(const Arg arg)
     XUnmapWindow(dpy, movec->win);
 
     update_all_windows();
+    drawbar();
 }
 
 void close_win()
@@ -253,14 +256,20 @@ void destroynotify(XEvent *ev)
     remove_window(dstr->window);
     update_all_titles();
     update_all_windows();
+    drawbar();
 }
 
 void drawbar()
 {
-    Window win = XCreateSimpleWindow(dpy, root, 0, 0, screen_w, 15, 0, color_unfocus, color_unfocus);
+    Window win = XCreateSimpleWindow(dpy, root, 0, 0, screen_w, TOPBAR, 0, color_focus, color_focus);
 	XMapWindow(dpy, win);
-	XDrawRectangle(dpy, win, setcolor(UNFOCUS), 0, 0, screen_w, 14);
-	XFillRectangle(dpy, win, setcolor(UNFOCUS), 0, 0, screen_w, 15);
+	XDrawRectangle(dpy, win, setcolor(FOCUS), 0, 0, screen_w, TOPBAR - 1);
+	XFillRectangle(dpy, win, setcolor(FOCUS), 0, 0, screen_w, TOPBAR);
+    
+    char desktoptext[4]; 
+    snprintf(desktoptext, 4, "[%d]", currentdesktop);
+
+    XDrawString(dpy, win, setcolor(STATUSTXT), 5, TOPBAR - 3, desktoptext, 5);
 
     XSync(dpy, False);
 }
@@ -324,12 +333,13 @@ void maprequest(XEvent *ev)
     max_win();
     update_all_titles();
     update_all_windows();
+    drawbar();
 }
 
 void max_win()
 {
     if (current != NULL && current->win != None) 
-        XMoveResizeWindow(dpy, current->win, 0, 5, screen_w - 2, screen_h - 20);
+        XMoveResizeWindow(dpy, current->win, 0, TOPBAR, screen_w - 2, screen_h - (TOPBAR * 2) - 2);
 }
 
 void motionnotify(XEvent *ev)
@@ -389,6 +399,7 @@ void next_win()
 
         current = c;
         update_all_windows();
+        drawbar();
     }
 }
 
@@ -404,6 +415,7 @@ void prev_win()
 
         current = c;
         update_all_windows();
+        drawbar();
     }
 }
 
@@ -610,7 +622,6 @@ void update_all_windows()
             XSetWindowBorder(dpy, c->win, color_focus);
             XSetInputFocus(dpy, c->win, RevertToParent, CurrentTime);
             XRaiseWindow(dpy, c->win);
-            /*drawbar();*/
         } else {
             XSetWindowBorder(dpy, c->win, color_unfocus);
         }
