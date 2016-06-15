@@ -29,7 +29,8 @@
 enum wm_command {MOVE_L, MOVE_D, MOVE_U, MOVE_R,
                  RESIZE_L, RESIZE_D, RESIZE_U, RESIZE_R,
                  RAISE_WIN, MAX_WIN, CLOSE_WIN, 
-                 NEXT_WIN, PREV_WIN, SPAWN, QUIT_WM, NOP};
+                 NEXT_WIN, PREV_WIN, DESK_1, DESK_2, 
+                 SPAWN, QUIT_WM, NOP};
 
 typedef union {
     const char** com;
@@ -43,7 +44,7 @@ struct key {
     const Arg arg;
 };
 
-struct client{
+struct client {
     struct client *next;
     struct client *prev;
 
@@ -52,10 +53,16 @@ struct client{
     unsigned int desktop;
 };
 
+struct desktop {
+    struct client *head;
+    struct client *current;
+};
+
 /* declare functions */
 static void addwindow(Window w);
 static void buttonpress(XEvent *ev);
 static void buttonrelease(XEvent *ev);
+static void change_desktop(int d);
 static void close_win();
 static void destroynotify(XEvent *ev);
 static unsigned long getcolor(const char* color);
@@ -67,6 +74,8 @@ static void next_win();
 static void prev_win();
 static void remove_win(Window w);
 static void run();
+static void save_desktop(int d);
+static void select_desktop(int d);
 static void send_kill_signal(Window w);
 static void setup();
 static void sigchld(int unused);
@@ -82,6 +91,7 @@ static unsigned int color_unfocus;
 static unsigned int color_status;
 static struct client *current; 
 static unsigned int currentdesktop;
+static struct desktop desktops[10];
 static Display *dpy;
 static void (*handler[LASTEvent]) (XEvent *) = {
 	[ButtonPress] = buttonpress,
@@ -147,6 +157,28 @@ void buttonpress(XEvent *ev)
 void buttonrelease(XEvent *ev)
 {
     start.subwindow = None;
+}
+
+void change_desktop(int d)
+{
+    struct client *c;
+
+    if (d == currentdesktop)
+        return;
+
+    if (head != NULL)
+        for (c = head; c; c = c->next)
+            XUnmapWindow(dpy, c->win);
+
+    save_desktop(currentdesktop);
+    
+    select_desktop(d);
+
+    if (head != NULL)
+        for (c = head; c; c = c->next)
+            XMapWindow(dpy, c->win);
+
+    update_all_windows();
 }
 
 void close_win()
@@ -302,6 +334,12 @@ void keypress(XEvent *ev)
     case PREV_WIN:
         prev_win();
         break;
+    case DESK_1:
+        change_desktop(0);
+        break;
+    case DESK_2:
+        change_desktop(1);
+        break;
     case SPAWN:
         spawn(keys[i].arg);
         break;
@@ -419,6 +457,19 @@ void run()
 			handler[ev.type](&ev); /* call handler */
 }
 
+void save_desktop(int d)
+{
+    desktops[d].head = head;
+    desktops[d].current = current;
+}
+
+void select_desktop(int d)
+{
+    head = desktops[d].head;
+    current = desktops[d].current;
+    currentdesktop = d;
+}
+
 void send_kill_signal(Window w)
 {
     XEvent ke;
@@ -448,6 +499,16 @@ void setup()
 
     head = NULL;
     current = NULL;
+
+    int i;
+    for (i = 0; i < 10; i++) {
+        desktops[i].head = head;
+        desktops[i].current = current;
+    }
+
+    /* Select first desktop as default */
+    currentdesktop = 0;
+    change_desktop(currentdesktop);
 
     XSelectInput(dpy,root,SubstructureNotifyMask|SubstructureRedirectMask|PropertyChangeMask);
 }
