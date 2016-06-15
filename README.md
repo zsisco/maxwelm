@@ -2,7 +2,7 @@
 
 maxwelm is written by Zach Sisco `<sisco.z.d@gmail.com>`, 2016.
 
-Maxwelm is a simple window manager based off of [catwm](https://github.com/pyknite/catwm), my previous window manager [ShMOW](https://github.com/zsisco/ShMOW), and [dwm](http://dwm.suckless.org) and [TinyWM](https://github.com/mackstann/tinywm) when I get stuck. 
+Maxwelm is a simple window manager based off of [catwm](https://github.com/pyknite/catwm), my previous window manager [ShMOW](https://github.com/zsisco/ShMOW), and bits of [dwm](http://dwm.suckless.org) and [TinyWM](https://github.com/mackstann/tinywm) when I get stuck. 
 The main idea is to have a window manager suitable for small screens (and slower machines) that minimizes clutter and maximizes precious screen real estate.
 All configuration is done in the config.h file. 
 
