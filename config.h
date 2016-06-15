@@ -37,6 +37,8 @@ static struct key keys[] = {
     { MOD,             XK_7,      DESK_7,       {NULL}},
     { MOD,             XK_8,      DESK_8,       {NULL}},
     { MOD,             XK_9,      DESK_9,       {NULL}},
+    { MOD|ShiftMask,   XK_1,      MOVEDESK_1,   {NULL}},
+    { MOD|ShiftMask,   XK_2,      MOVEDESK_2,   {NULL}},
     { MOD,             XK_p,      SPAWN,        {.com = dmenucmd}},
     { MOD,             XK_Return, SPAWN,        {.com = termcmd}},
     { MOD|ShiftMask,   XK_t,      QUIT_WM,      {NULL}}

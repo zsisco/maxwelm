@@ -25,7 +25,8 @@ enum wm_command {MOVE_L, MOVE_D, MOVE_U, MOVE_R,
                  RAISE_WIN, MAX_WIN, CLOSE_WIN, 
                  NEXT_WIN, PREV_WIN, DESK_1, DESK_2, 
                  DESK_3, DESK_4, DESK_5, DESK_6, DESK_7,
-                 DESK_8, DESK_9, SPAWN, QUIT_WM, NOP};
+                 DESK_8, DESK_9, MOVEDESK_1, MOVEDESK_2, 
+                 SPAWN, QUIT_WM, NOP};
 
 typedef union {
     const char** com;
@@ -53,11 +54,12 @@ struct desktop {
 };
 
 /* declare functions */
-static void addwindow(Window w);
+static void add_window(Window w);
 static void buttonpress(XEvent *ev);
 static void buttonrelease(XEvent *ev);
 static void change_desktop(int d);
 static void close_win();
+static void configurerequest(XEvent *e);
 static void destroynotify(XEvent *ev);
 static unsigned long getcolor(const char* color);
 static void grabinput();
@@ -66,7 +68,7 @@ static void maprequest(XEvent *ev);
 static void motionnotify(XEvent *ev);
 static void next_win();
 static void prev_win();
-static void remove_win(Window w);
+static void remove_window(Window w);
 static void run();
 static void save_desktop(int d);
 static void select_desktop(int d);
@@ -90,6 +92,7 @@ static Display *dpy;
 static void (*handler[LASTEvent]) (XEvent *) = {
 	[ButtonPress] = buttonpress,
 	[ButtonRelease] = buttonrelease,
+	[ConfigureRequest] = configurerequest,
 	[DestroyNotify] = destroynotify,
 	[KeyPress] = keypress,
 	[MapRequest] = maprequest,
@@ -105,7 +108,7 @@ static XButtonEvent start;
 /* include config here to use structs defined above */
 #include "config.h"
 
-void addwindow(Window new_win)
+void add_window(Window new_win)
 {
     struct client *newclient, *tmp;
 
@@ -174,6 +177,26 @@ void change_desktop(int d)
     update_all_windows();
 }
 
+void client_to_desktop(int d)
+{
+    struct client *movec = current;
+    int orig_desktop = currentdesktop;
+
+    if (d == currentdesktop || current == NULL)
+        return;
+
+    save_desktop(orig_desktop);
+    select_desktop(d);
+    add_window(movec->win);
+    save_desktop(d);
+
+    select_desktop(orig_desktop);
+    remove_window(movec->win);
+    XUnmapWindow(dpy, movec->win);
+
+    update_all_windows();
+}
+
 void close_win()
 {
     if (current != NULL) {
@@ -188,6 +211,20 @@ void close_win()
 		XSendEvent(dpy, current->win, False, NoEventMask, &ke);
         send_kill_signal(current->win);
     }
+}
+
+void configurerequest(XEvent *e) {
+    /* Paste from dwm */
+    XConfigureRequestEvent *ev = &e->xconfigurerequest;
+    XWindowChanges wc;
+    wc.x = ev->x;
+    wc.y = ev->y;
+    wc.width = ev->width;
+    wc.height = ev->height;
+    wc.border_width = ev->border_width;
+    wc.sibling = ev->above;
+    wc.stack_mode = ev->detail;
+    XConfigureWindow(dpy, ev->window, ev->value_mask, &wc);
 }
 
 void destroynotify(XEvent *ev)
@@ -205,7 +242,7 @@ void destroynotify(XEvent *ev)
     if (i == 0)
         return;
 
-    remove_win(dstr->window);
+    remove_window(dstr->window);
     update_all_titles();
     update_all_windows();
 }
@@ -354,6 +391,12 @@ void keypress(XEvent *ev)
     case DESK_9:
         change_desktop(8);
         break;
+    case MOVEDESK_1:
+        client_to_desktop(0);
+        break;
+    case MOVEDESK_2:
+        client_to_desktop(1);
+        break;
     case SPAWN:
         spawn(keys[i].arg);
         break;
@@ -374,7 +417,7 @@ void maprequest(XEvent *ev)
     if (wa.override_redirect) /* for popups/dialogs */
         return;
 
-    addwindow(mapev->window);
+    add_window(mapev->window);
     /* Map window and maximize, true to name */
     XMapWindow(dpy, mapev->window);
     if (current != NULL && current->win != None) 
@@ -427,7 +470,7 @@ void prev_win()
     }
 }
 
-void remove_win(Window w)
+void remove_window(Window w)
 {
     struct client *c;
 
