@@ -17,11 +17,13 @@ To do:
        mouse-focus no longer functional, focus only through tabbing
        can still interactive move/resize and raise window (no focus) with mouse
    [X] add_window() add AFTER CURRENT client in list
+   [X] auto maximize windows
+   [ ] change spawn location of windows (MapRequest?)
+   [ ] graceful quit WM
    [ ] Alt + r - set current window
    [ ] Alt + m - toggle?
-   [ ] auto maximize windows?
    [ ] maximize mode?
-   [ ] change spawn location of windows (MapRequest?)
    [ ] signal? why?
    [ ] draw bar on screen
    [ ] custom status text (PropertyNotify?)
+   [ ] virtual desktops?

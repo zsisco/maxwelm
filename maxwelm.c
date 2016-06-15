@@ -106,10 +106,8 @@ void close_win()
 		ke.xclient.data.l[1] = CurrentTime;
 		XSendEvent(dpy, current->win, False, NoEventMask, &ke);
         send_kill_signal(current->win);
-        fprintf(stderr, "\n\t##############CLOSE WINDOW##################\n");
     }
 }
-
 
 void destroynotify(XEvent *ev)
 {
@@ -126,7 +124,6 @@ void destroynotify(XEvent *ev)
     if (i == 0)
         return;
 
-    fprintf(stderr, "\t!!!!!!!!!!!!!!SEEK AND DESTROY!!!!!!!!!!!!!!\n");
     remove_win(dstr->window);
     update_all_titles();
     update_all_windows();
@@ -164,8 +161,6 @@ void grabinput()
 
 void keypress(XEvent *ev)
 {
-    /*KeySym keysym = XkbKeycodeToKeysym(dpy, ev->xkey.keycode, 
-                                               0, ev->xkey.state & ShiftMask ? 1 : 0);*/
     KeySym keysym = XkbKeycodeToKeysym(dpy, ev->xkey.keycode, 0, 0);
 
     enum wm_command cmd = NOP;
@@ -206,12 +201,6 @@ void keypress(XEvent *ev)
         }
         break;
     case RESIZE_L:
-        /*
-        if (ev->xkey.subwindow != None && ev->xkey.state == (1<<3)) {
-            XGetWindowAttributes(dpy, ev->xkey.subwindow, &attr);
-            XResizeWindow(dpy, ev->xkey.subwindow, MAX(1, attr.width - RESIZER), attr.height);
-        } 
-        */
         if (current != NULL && current->win != None) {
             XGetWindowAttributes(dpy, current->win, &attr);
             XResizeWindow(dpy, current->win, MAX(1, attr.width - RESIZER), attr.height);
@@ -271,7 +260,10 @@ void maprequest(XEvent *ev)
 {
     XMapRequestEvent *mapev = &ev->xmaprequest;
     add_window(mapev->window);
+    /* Map window and maximize, true to name */
     XMapWindow(dpy, mapev->window);
+    if (current != NULL && current->win != None) 
+        XMoveResizeWindow(dpy, current->win, 0, 5, screen_w - 2, screen_h - 20);
     update_all_titles();
     update_all_windows();
 }
@@ -465,7 +457,7 @@ void update_all_windows()
 
     for (c = head; c; c = c->next) {
         if (current == c) {
-            XSetWindowBorderWidth(dpy, c->win, 2);
+            XSetWindowBorderWidth(dpy, c->win, 1);
             XSetWindowBorder(dpy, c->win, color_focus);
             XSetInputFocus(dpy, c->win, RevertToParent, CurrentTime);
             XRaiseWindow(dpy, c->win);
