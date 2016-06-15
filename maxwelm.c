@@ -49,6 +49,7 @@ struct client{
 
     Window win;
 	char name[256];
+    unsigned int desktop;
 };
 
 /* declare functions */
@@ -75,18 +76,13 @@ static void update_all_windows();
 static void update_title(struct client *c);
 
 /* variables */
-static Display *dpy;
 static XWindowAttributes attr;
-static XButtonEvent start;
-static Window root;
-static int screen;
-static int screen_w;
-static int screen_h;
-static struct client *head; 
-static struct client *current; 
 static unsigned int color_focus;
 static unsigned int color_unfocus;
 static unsigned int color_status;
+static struct client *current; 
+static unsigned int currentdesktop;
+static Display *dpy;
 static void (*handler[LASTEvent]) (XEvent *) = {
 	[ButtonPress] = buttonpress,
 	[ButtonRelease] = buttonrelease,
@@ -95,6 +91,12 @@ static void (*handler[LASTEvent]) (XEvent *) = {
 	[MapRequest] = maprequest,
 	[MotionNotify] = motionnotify
 };
+static struct client *head; 
+static Window root;
+static int screen;
+static int screen_w;
+static int screen_h;
+static XButtonEvent start;
 
 /* include config here to use structs defined above */
 #include "config.h"
@@ -109,6 +111,7 @@ void addwindow(Window new_win)
     }
 
     newclient->win = new_win;
+    newclient->desktop = currentdesktop;
 
     if (head == NULL) {
         newclient->next = NULL;
@@ -118,6 +121,9 @@ void addwindow(Window new_win)
         for (tmp = head; tmp->next; tmp = tmp->next)
             if (tmp == current)
                 break;
+
+        if (tmp->next != NULL)
+            tmp->next->prev = newclient;
 
         newclient->next = tmp->next;
         newclient->prev = tmp;
@@ -508,7 +514,7 @@ void update_title(struct client *c)
 {
     char *wname = NULL;
     if (XFetchName(dpy, c->win, &wname) > 0) {
-        fprintf(stdout, "[%s]", wname);
+        fprintf(stdout, "[%d|%s]", c->desktop, wname);
         strncpy(c->name, wname, sizeof(c->name));
         XFree(wname);
     }
