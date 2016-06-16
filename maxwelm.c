@@ -111,6 +111,8 @@ static void (*handler[LASTEvent]) (XEvent *) = {
     [PropertyNotify] = propertynotify
 };
 static struct client *head; 
+static int maxwin_h;
+static int maxwin_w;
 static Atom NetWMName;
 static Window root;
 static Bool running = True;
@@ -432,7 +434,7 @@ void maprequest(XEvent *ev)
 void max_win()
 {
     if (current != NULL && current->win != None) 
-        XMoveResizeWindow(dpy, current->win, 0, TOPBAR, screen_w - 2, screen_h - (TOPBAR * 2) - 2);
+        XMoveResizeWindow(dpy, current->win, 0, TOPBAR, maxwin_w, maxwin_h);
 }
 
 void motionnotify(XEvent *ev)
@@ -647,6 +649,9 @@ void setup()
     screen_w = XDisplayWidth(dpy, screen);
     screen_h = XDisplayHeight(dpy, screen);
     root = RootWindow(dpy,screen);
+
+    maxwin_w = screen_w - 2;
+    maxwin_h = screen_h - (TOPBAR * 2) - 2;
 
     grabinput();
 
