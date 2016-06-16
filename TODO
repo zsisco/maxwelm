@@ -21,15 +21,15 @@ To do:
    [X] change spawn location of windows (MapRequest, by virtue of item above)
    [X] virtual desktops
    [X] fun colors, config different LIGHT colors for desktops and borders
-   [ ] top bar 
+   [X] top bar 
     |--[X] draw bar on screen
     |--[X] show desktop number
     |--[X] show focused window name
     |--[X] custom status text 
         |--[X] PropertyNotify
         |--[X] get Atoms and stuff
+   [ ] BUG: moving windows between desktops crashes drawbar()
    [ ] transient windows
-   [ ] bug: moving windows between desktops crashes drawbar()
    [ ] graceful quit WM
    [ ] If max then no border, else border
    [ ] Alt + m - toggle? save old x and y

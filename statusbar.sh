@@ -29,7 +29,6 @@ wifi() {
     fi
 }
 
-# This loop will fill a buffer with our infos and output it to stdout.
 while :; do
     buf=" "
     buf="${buf}$(battery)"
