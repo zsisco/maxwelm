@@ -479,12 +479,6 @@ void propertynotify(XEvent *ev)
 {
     fprintf(stdout, "\nPropertyNotify\n");
     XPropertyEvent *propev = &ev->xproperty;
-    struct client *c = NULL;
-    struct client *tmp;
-
-    for (tmp = head; tmp; tmp = tmp->next) 
-        if (tmp->win == propev->window) 
-            c = tmp;
 
     if ((propev->window == root) && (propev->atom == XA_WM_NAME)) {
         fprintf(stdout, "\tupdate status\n");
@@ -492,18 +486,13 @@ void propertynotify(XEvent *ev)
         drawbar();
     } else if (propev->state == PropertyDelete) {
         return; /*ignore*/
-    } else if (c) {
-        if(propev->atom == XA_WM_NAME || propev->atom == NetWMName) {
-            fprintf(stdout, "\tupdate title\n");
-            update_title(c);
-            drawbar();
-        }
-    }
+    } 
 }
 
 void quit_wm()
 {
     fprintf(stdout, "quitting...jk nm\n");
+    /* also, kill statusbar process? */
 }
 
 void remove_window(Window w)
