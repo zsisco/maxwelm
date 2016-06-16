@@ -27,6 +27,7 @@ To do:
     |--[ ] custom status text 
         |--[ ] PropertyNotify
         |--[ ] also, transient windows
+   [ ] fun colors, config different LIGHT colors for desktops
    [ ] graceful quit WM
    [ ] If max then no border, else border
    [ ] Alt + m - toggle? save old x and y
