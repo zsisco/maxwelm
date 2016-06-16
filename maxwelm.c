@@ -22,6 +22,7 @@
 #define LENGTH(X) (sizeof(X) / sizeof(*X))
 #define RESIZER 15
 #define TOPBAR 15
+#define WINBORDER 1
 
 enum direction {LEFT, DOWN, UP, RIGHT};
 
@@ -203,7 +204,7 @@ void change_desktop(const Arg arg)
         for (c = head; c; c = c->next)
             XMapWindow(dpy, c->win);
 
-    color_light = getcolor(colors[currentdesktop]);
+    color_light = getcolor(focuscolors[currentdesktop]);
     update_all_windows();
     drawbar();
 }
@@ -328,17 +329,17 @@ void drawbar()
     fprintf(stdout, "\t          create simple window\n");
 	XMapWindow(dpy, win);
     fprintf(stdout, "\t          map window\n");
-	XDrawRectangle(dpy, win, setcolor(colors[currentdesktop]), 0, 0, screen_w, TOPBAR - 1);
+	XDrawRectangle(dpy, win, setcolor(focuscolors[currentdesktop]), 0, 0, screen_w, TOPBAR - 1);
     fprintf(stdout, "\t          draw rectangle\n");
-	XFillRectangle(dpy, win, setcolor(colors[currentdesktop]), 0, 0, screen_w, TOPBAR);
+	XFillRectangle(dpy, win, setcolor(focuscolors[currentdesktop]), 0, 0, screen_w, TOPBAR);
     fprintf(stdout, "\t          fill rectangle\n");
 
     /* draw status text area */
-	XDrawRectangle(dpy, win, setcolor(DARK), screen_w - status_w, 0, status_w, TOPBAR - 1);
+	XDrawRectangle(dpy, win, setcolor(UNFOCUS), screen_w - status_w, 0, status_w, TOPBAR - 1);
     fprintf(stdout, "\t          draw rectangle\n");
-	XFillRectangle(dpy, win, setcolor(DARK), screen_w - status_w, 0, status_w, TOPBAR);
+	XFillRectangle(dpy, win, setcolor(UNFOCUS), screen_w - status_w, 0, status_w, TOPBAR);
     fprintf(stdout, "\t          fill rectangle\n");
-    XDrawString(dpy, win, setcolor(colors[currentdesktop]), screen_w - status_w + 1, TOPBAR - 3, status_text, strlen(status_text));
+    XDrawString(dpy, win, setcolor(focuscolors[currentdesktop]), screen_w - status_w + 1, TOPBAR - 3, status_text, strlen(status_text));
     fprintf(stdout, "\t          draw status text\n");
     
     /* load current window name */
@@ -351,7 +352,7 @@ void drawbar()
 
     /* draw desktop number and window name */
     snprintf(barbuffer, bar_w, "[%d] [%s]", currentdesktop, (current == NULL ? "" : current->name));
-    XDrawString(dpy, win, setcolor(DARK), 5, TOPBAR - 3, barbuffer, strlen(barbuffer));
+    XDrawString(dpy, win, setcolor(UNFOCUS), 5, TOPBAR - 3, barbuffer, strlen(barbuffer));
     fprintf(stdout, "\t          draw bar text\n");
 
     fprintf(stdout, "\tdrawbar<-\n\n");
@@ -674,8 +675,8 @@ void setup()
     screen_h = XDisplayHeight(dpy, screen);
     root = RootWindow(dpy,screen);
 
-    maxwin_w = screen_w - 2;
-    maxwin_h = screen_h - (TOPBAR * 2) - 2;
+    maxwin_w = screen_w - (2 * WINBORDER);
+    maxwin_h = screen_h - TOPBAR - (2 * WINBORDER);
 
     grabinput();
 
@@ -697,8 +698,8 @@ void setup()
     change_desktop(arg);
 
     /* init color stuff */
-    color_light = getcolor(colors[currentdesktop]);
-    color_dark = getcolor(DARK);
+    color_light = getcolor(focuscolors[currentdesktop]);
+    color_dark = getcolor(UNFOCUS);
     cmap = DefaultColormap(dpy, screen);
     XGCValues val;
     val.font = XLoadFont(dpy, "fixed");

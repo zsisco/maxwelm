@@ -5,20 +5,13 @@
 #define MOD Mod1Mask
 
 /* Colors */
-#define LIGHT "rgb:9a/cc/79"
-#define DARK  "rgb:1c/1c/1c"
-
-/* Status bar script name.
- * If there is none, change it to ""
- */
-#define STATUS_BAR_SCRIPT "statusbar.sh"
-
-static char* colors[10] = {  /* initialize 10 colors */
+#define UNFOCUS "rgb:1c/1c/1c"
+static char* focuscolors[10] = {  /* initialize 10 colors */
     "rgb:9a/cc/79",
     "rgb:9a/cc/79",
+    "rgb:79/9a/cc",
     "rgb:9a/79/cc",
     "rgb:79/cc/9a",
-    "rgb:79/9a/cc",
     "rgb:cc/79/9a",
     "rgb:cc/9a/79",
     "rgb:9a/cc/79",
@@ -26,7 +19,18 @@ static char* colors[10] = {  /* initialize 10 colors */
     "rgb:fa/fc/f9",
 };
 
-const char* statusbarcmd[] = {"./"STATUS_BAR_SCRIPT, NULL};      /* do not remove this line */
+/* 
+ * Status bar script command name.
+ * If there is none, change it to ""
+ */
+#define STATUS_BAR_SCRIPT "statusbar.sh"
+
+/*
+ * If STATUS_BAR_SCRIPT is not in your PATH,
+ * change statusbarcmd[] to:
+ *   statusbarcmd[] = {"./path/to/script/"STATUS_BAR_SCRIPT, NULL};
+ */
+const char* statusbarcmd[] = {STATUS_BAR_SCRIPT, NULL};          /* do not remove this line */
 const char* killstatusbarcmd[] = {"killall", STATUS_BAR_SCRIPT}; /* do not remove this line */
 const char* dmenucmd[] = {"dmenu_run",NULL};
 const char* termcmd[]  = {"urxvt",NULL};

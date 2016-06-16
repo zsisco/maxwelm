@@ -1,9 +1,21 @@
-PREFIX?=/usr/X11R6
-CFLAGS?=-Os -pedantic -Wall
+CFLAGS+= -pedantic -Wall
+LDADD+= -lX11 -lm
+LDFLAGS=
+EXEC=maxwelm
 
-all:
-	$(CC) $(CFLAGS) -I$(PREFIX)/include maxwelm.c -L$(PREFIX)/lib -lX11 -o maxwelm
+PREFIX?= /usr
+BINDIR?= $(PREFIX)/bin
+
+CC=gcc
+
+all: $(EXEC)
+
+maxwelm: maxwelm.o
+	$(CC) $(LDFLAGS) -Os -o $@ $+ $(LDADD)
+
+install: all
+	install -Dm 755 maxwelm $(DESTDIR)$(BINDIR)/maxwelm
 
 clean:
-	rm -f maxwelm
+	rm -f maxwelm *.o
 
