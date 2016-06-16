@@ -8,12 +8,12 @@ The main idea is to have a window manager suitable for small screens (and slower
 ####Features
 - All windows are maximized on creation (like monocle mode in dwm or other tiling window managers)
 - Windows can be moved and resized with the mouse or through hotkeys
-- Virtual desktops
 - Status bar at the top of the screen displays current desktop number, focused window name, and custom status text
+- Virtual desktops
 
 ####Configuration
-- All configuration is done in the config.h file (mostly key bindings, colors, and custom commands)
-- Custom status text is set by "xsetroot -name $status" (similar to dwm) where $status is a string variable. A sample shell script is provided; while starting the window manager, run `./statusbar.sh`.
+- All configuration is done in `config.h` (mostly key bindings, colors, and custom commands)
+- Custom status text is set by `xsetroot -name $status` (similar to dwm) where `$status` is a string variable. A sample shell script is provided -- `statusbar.sh`. It may use programs not installed on your machine; change it to output whatever you like. 
 
 ####Dependencies:
 - Xlib.
@@ -33,5 +33,5 @@ Alt + (0 - 9)          focus virtual desktop (0 - 9)
 Alt + Shift + (0 - 9): move focused window to virtual desktop (0 - 9)
 Alt + Enter:           spawn terminal
 Alt + p:               spawn dmenu
-Alt + Shift + t:       quit
+Alt + Control + t:     quit maxwelm
 ```
