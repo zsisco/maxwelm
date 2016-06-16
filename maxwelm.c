@@ -181,6 +181,7 @@ void change_desktop(const Arg arg)
         for (c = head; c; c = c->next)
             XMapWindow(dpy, c->win);
 
+    color_light = getcolor(colors[currentdesktop]);
     update_all_windows();
     drawbar();
 }
@@ -269,9 +270,9 @@ void drawbar()
     fprintf(stdout, "\t          create simple window\n");
 	XMapWindow(dpy, win);
     fprintf(stdout, "\t          map window\n");
-	XDrawRectangle(dpy, win, setcolor(LIGHT), 0, 0, screen_w, TOPBAR - 1);
+	XDrawRectangle(dpy, win, setcolor(colors[currentdesktop]), 0, 0, screen_w, TOPBAR - 1);
     fprintf(stdout, "\t          draw rectangle\n");
-	XFillRectangle(dpy, win, setcolor(LIGHT), 0, 0, screen_w, TOPBAR);
+	XFillRectangle(dpy, win, setcolor(colors[currentdesktop]), 0, 0, screen_w, TOPBAR);
     fprintf(stdout, "\t          fill rectangle\n");
 
     /* draw status text area */
@@ -279,7 +280,7 @@ void drawbar()
     fprintf(stdout, "\t          draw rectangle\n");
 	XFillRectangle(dpy, win, setcolor(DARK), screen_w - status_w, 0, status_w, TOPBAR);
     fprintf(stdout, "\t          fill rectangle\n");
-    XDrawString(dpy, win, setcolor(LIGHT), screen_w - status_w + 1, TOPBAR - 3, status_text, strlen(status_text));
+    XDrawString(dpy, win, setcolor(colors[currentdesktop]), screen_w - status_w + 1, TOPBAR - 3, status_text, strlen(status_text));
     fprintf(stdout, "\t          draw status text\n");
     
     /* load current window name */
@@ -581,7 +582,7 @@ void setup()
     change_desktop(arg);
 
     /* init color stuff */
-    color_light = getcolor(LIGHT);
+    color_light = getcolor(colors[currentdesktop]);
     color_dark = getcolor(DARK);
     cmap = DefaultColormap(dpy, screen);
     XGCValues val;

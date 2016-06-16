@@ -20,6 +20,7 @@ To do:
    [X] auto maximize windows
    [X] change spawn location of windows (MapRequest, by virtue of item above)
    [X] virtual desktops
+   [X] fun colors, config different LIGHT colors for desktops and borders
    [ ] top bar 
     |--[X] draw bar on screen
     |--[X] show desktop number
@@ -27,7 +28,7 @@ To do:
     |--[ ] custom status text 
         |--[ ] PropertyNotify
         |--[ ] also, transient windows
-   [ ] fun colors, config different LIGHT colors for desktops and borders
+   [ ] bug: moving windows between desktops crashes drawbar()
    [ ] graceful quit WM
    [ ] If max then no border, else border
    [ ] Alt + m - toggle? save old x and y

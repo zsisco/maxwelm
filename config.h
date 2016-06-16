@@ -8,14 +8,14 @@
 #define LIGHT "rgb:9a/cc/79"
 #define DARK  "rgb:1c/1c/1c"
 
-static char* colors[] = {
+static char* colors[10] = {  /* please initialize 10 */
     "rgb:9a/cc/79",
-    "rgb:cc/9a/79",
+    "rgb:9a/cc/79",
     "rgb:9a/79/cc",
     "rgb:79/cc/9a",
     "rgb:79/9a/cc",
     "rgb:cc/79/9a",
-    "rgb:9a/cc/79",
+    "rgb:cc/9a/79",
     "rgb:9a/cc/79",
     "rgb:9a/cc/79",
     "rgb:fa/fc/f9",
