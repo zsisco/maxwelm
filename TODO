@@ -33,4 +33,3 @@ To do:
    [X] BUG: moving windows between desktops crashes drawbar()
    [ ] transient windows (dialog, popups)
    [ ] maximize mode?
-   [ ] signal? why?
