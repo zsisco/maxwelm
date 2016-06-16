@@ -8,11 +8,33 @@
 #define LIGHT "rgb:9a/cc/79"
 #define DARK  "rgb:1c/1c/1c"
 
+static char* colors[] = {
+    "rgb:9a/cc/79",
+    "rgb:cc/9a/79",
+    "rgb:9a/79/cc",
+    "rgb:79/cc/9a",
+    "rgb:79/9a/cc",
+    "rgb:cc/79/9a",
+    "rgb:9a/cc/79",
+    "rgb:9a/cc/79",
+    "rgb:9a/cc/79",
+    "rgb:fa/fc/f9",
+};
+
 const char* dmenucmd[] = {"dmenu_run",NULL};
 const char* termcmd[]  = {"urxvt",NULL};
 
 static struct key keys[] = {
     /*MOD              KEY        FUNCTION           ARGS */
+    { MOD,             XK_m,      max_win,           {NULL}},
+    { MOD|ShiftMask,   XK_w,      close_win,         {NULL}},
+    { MOD,             XK_Tab,    next_win,          {NULL}},
+    { MOD|ShiftMask,   XK_Tab,    prev_win,          {NULL}},
+    { MOD|ShiftMask,   XK_t,      quit_wm,           {NULL}},
+    /* run commands */
+    { MOD,             XK_p,      spawn,             {.com = dmenucmd}},
+    { MOD,             XK_Return, spawn,             {.com = termcmd}},
+    /* move/resize */
     { MOD,             XK_h,      move_win,          {.dir = LEFT}}, 
     { MOD|ShiftMask,   XK_h,      resize_win,        {.dir = LEFT}},
     { MOD,             XK_j,      move_win,          {.dir = DOWN}}, 
@@ -21,10 +43,7 @@ static struct key keys[] = {
     { MOD|ShiftMask,   XK_k,      resize_win,        {.dir = UP}},
     { MOD,             XK_l,      move_win,          {.dir = RIGHT}}, 
     { MOD|ShiftMask,   XK_l,      resize_win,        {.dir = RIGHT}},
-    { MOD,             XK_m,      max_win,           {NULL}},
-    { MOD|ShiftMask,   XK_w,      close_win,         {NULL}},
-    { MOD,             XK_Tab,    next_win,          {NULL}},
-    { MOD|ShiftMask,   XK_Tab,    prev_win,          {NULL}},
+    /* virtual desktops */
     { MOD,             XK_0,      change_desktop,    {.i = 0}}, 
     { MOD|ShiftMask,   XK_0,      client_to_desktop, {.i = 0}},
     { MOD,             XK_1,      change_desktop,    {.i = 1}}, 
@@ -44,10 +63,7 @@ static struct key keys[] = {
     { MOD,             XK_8,      change_desktop,    {.i = 8}}, 
     { MOD|ShiftMask,   XK_8,      client_to_desktop, {.i = 8}},
     { MOD,             XK_9,      change_desktop,    {.i = 9}}, 
-    { MOD|ShiftMask,   XK_9,      client_to_desktop, {.i = 9}},
-    { MOD,             XK_p,      spawn,             {.com = dmenucmd}},
-    { MOD,             XK_Return, spawn,             {.com = termcmd}},
-    { MOD|ShiftMask,   XK_t,      quit_wm,           {NULL}}
+    { MOD|ShiftMask,   XK_9,      client_to_desktop, {.i = 9}}
 };
 
 #endif
