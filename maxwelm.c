@@ -258,8 +258,9 @@ void client_to_desktop(const Arg arg)
     save_desktop(d);
 
     select_desktop(orig_desktop);
+    if (movec->win != None)
+        XUnmapWindow(dpy, movec->win);
     remove_window(movec->win);
-    XUnmapWindow(dpy, movec->win);
 
     update_all_windows();
     drawbar();
