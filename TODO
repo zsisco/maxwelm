@@ -7,10 +7,10 @@ To do:
    [X] get window name
    [X] window name update function
    [X] put windows in linked list, test this
-    [X] add
-    [X] remove
-    [X] next
-    [X] prev
+    |--[X] add
+    |--[X] remove
+    |--[X] next
+    |--[X] prev
    [X] kill client
    [X] rewrite keypress() for linked list windows (i.e. current)
    [X] current/focus window? 
@@ -19,13 +19,16 @@ To do:
    [X] add_window() add AFTER CURRENT client in list
    [X] auto maximize windows
    [X] change spawn location of windows (MapRequest, by virtue of item above)
+   [X] virtual desktops
+   [ ] top bar 
+    |--[X] draw bar on screen
+    |--[X] show desktop number
+    |--[ ] show focused window name
+    |--[ ] custom status text 
+        |--[ ] PropertyNotify
+        |--[ ] also, transient windows
    [ ] graceful quit WM
    [ ] Alt + m - toggle?
        If max then no border, else border
    [ ] maximize mode?
    [ ] signal? why?
-   [ ] draw bar on screen
-    [ ] status bar 
-   [ ] custom status text (PropertyNotify)
-    [ ] also, transient windows
-   [X] virtual desktops

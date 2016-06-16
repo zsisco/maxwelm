@@ -7,7 +7,7 @@
 /* Colors */
 #define FOCUS     "rgb:9a/cc/79"
 #define UNFOCUS   "rgb:1c/1c/1c"
-#define STATUS    "rgb:f9/f9/e9"
+#define STATUS    "rgb:9a/cc/79"
 #define STATUSTXT "rgb:1c/1c/1c" 
 
 const char* dmenucmd[] = {"dmenu_run",NULL};

@@ -259,26 +259,59 @@ void destroynotify(XEvent *ev)
     drawbar();
 }
 
-void drawbar()
+void drawbar()  /* need an updatebar() to not keep creating the same window? */
 {
-    fprintf(stdout, "\tdrawbar->\n");
-    XSync(dpy, False);
-    Window win = XCreateSimpleWindow(dpy, root, 0, 0, screen_w, TOPBAR, 0, color_focus, color_focus);
-    /*fprintf(stdout, "\t          create simple window\n");*/
-	XMapWindow(dpy, win);
-    /*fprintf(stdout, "\t          map window\n");*/
-	XDrawRectangle(dpy, win, setcolor(FOCUS), 0, 0, screen_w, TOPBAR - 1);
-    /*fprintf(stdout, "\t          draw rectangle\n");*/
-	XFillRectangle(dpy, win, setcolor(FOCUS), 0, 0, screen_w, TOPBAR);
-    /*fprintf(stdout, "\t          fill rectangle\n");*/
+    fprintf(stdout, "\n\tdrawbar->\n");
+
+    int status_w = strlen(status_text) * 6;
+    int bar_w = screen_w - status_w;
     
-    char desktoptext[4]; 
-    snprintf(desktoptext, 4, "[%d]", currentdesktop);
+    Window win = XCreateSimpleWindow(dpy, root, 0, 0, screen_w, TOPBAR, 0, color_focus, color_focus);
+    fprintf(stdout, "\t          create simple window\n");
+	XMapWindow(dpy, win);
+    fprintf(stdout, "\t          map window\n");
+	XDrawRectangle(dpy, win, setcolor(STATUS), 0, 0, screen_w, TOPBAR - 1);
+    fprintf(stdout, "\t          draw rectangle\n");
+	XFillRectangle(dpy, win, setcolor(STATUS), 0, 0, screen_w, TOPBAR);
+    fprintf(stdout, "\t          fill rectangle\n");
 
-    XDrawString(dpy, win, setcolor(STATUSTXT), 5, TOPBAR - 3, desktoptext, strlen(desktoptext));
-    /*fprintf(stdout, "\t          draw string\n");*/
+    /* draw status text area */
+	XDrawRectangle(dpy, win, setcolor(STATUSTXT), screen_w - status_w, 0, status_w, TOPBAR - 1);
+    fprintf(stdout, "\t          draw rectangle\n");
+	XFillRectangle(dpy, win, setcolor(STATUSTXT), screen_w - status_w, 0, status_w, TOPBAR);
+    fprintf(stdout, "\t          fill rectangle\n");
+    XDrawString(dpy, win, setcolor(STATUS), screen_w - status_w + 1, TOPBAR - 3, status_text, strlen(status_text));
+    fprintf(stdout, "\t          draw status text\n");
+    
+    /* load current window name */
+    if (current != NULL) {
+        update_title(current);
+        fprintf(stdout, "\n\t          update title\n");
+    }
 
-    XSync(dpy, False);
+    char barbuffer[bar_w]; 
+
+    /* draw desktop window number */
+    snprintf(barbuffer, bar_w, "[%d] [%s]", currentdesktop, (current == NULL ? "" : current->name));
+    XDrawString(dpy, win, setcolor(STATUSTXT), 5, TOPBAR - 3, barbuffer, strlen(barbuffer));
+    fprintf(stdout, "\t          draw bar text\n");
+
+    /*
+    char windowtext[bar_w];
+    snprintf(windowtext, bar_w, "%s", current->name);
+    */
+
+    /* draw current window name */
+    /*
+	XDrawRectangle(dpy, win, setcolor(STATUSTXT), screen_w / 4, 0, bar_w, TOPBAR - 1);
+    fprintf(stdout, "\t          draw rectangle\n");
+	XFillRectangle(dpy, win, setcolor(STATUSTXT), screen_w / 4, 0, bar_w, TOPBAR);
+    fprintf(stdout, "\t          fill rectangle\n");
+    XDrawString(dpy, win, setcolor(STATUSTXT), screen_w / 4, TOPBAR - 3, windowtext, strlen(windowtext));
+    fprintf(stdout, "\t          draw window text\n");
+    */
+
+    /*XSync(dpy, False);*/
     fprintf(stdout, "\tdrawbar<-\n\n");
 }
 
@@ -639,7 +672,7 @@ void update_all_windows()
 void update_title(struct client *c) 
 {
     char *wname = NULL;
-    if (XFetchName(dpy, c->win, &wname) > 0) {
+    if (c != NULL && XFetchName(dpy, c->win, &wname) > 0) {
         fprintf(stdout, "[%d|%s]", currentdesktop, wname);
         strncpy(c->name, wname, sizeof(c->name));
         XFree(wname);
