@@ -28,8 +28,8 @@ To do:
     |--[X] custom status text 
         |--[X] PropertyNotify
         |--[X] get Atoms and stuff
+   [X] graceful quit WM
    [ ] BUG: moving windows between desktops crashes drawbar()
-   [ ] graceful quit WM
    [ ] If max then no border, else border
    [ ] Alt + m - toggle? save old x and y
    [ ] transient windows (dialog, popups)

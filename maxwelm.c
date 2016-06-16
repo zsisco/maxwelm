@@ -56,6 +56,7 @@ static void add_window(Window w);
 static void buttonpress(XEvent *ev);
 static void buttonrelease(XEvent *ev);
 static void change_desktop(const Arg arg);
+static void cleanup();
 static void client_to_desktop(const Arg arg);
 static void close_win();
 static void configurerequest(XEvent *e);
@@ -112,6 +113,7 @@ static void (*handler[LASTEvent]) (XEvent *) = {
 static struct client *head; 
 static Atom NetWMName;
 static Window root;
+static Bool running = True;
 static int screen;
 static int screen_w;
 static int screen_h;
@@ -191,6 +193,41 @@ void change_desktop(const Arg arg)
     color_light = getcolor(colors[currentdesktop]);
     update_all_windows();
     drawbar();
+}
+
+void cleanup()
+{
+    int i;
+    struct client *c;
+    fprintf(stdout, "\ncleanup!\n\tremoving all windows\n");
+    for (i = 0; i < 10; i++) {
+        if (head != NULL)
+            for (c = head; c; c = c->next)
+                XUnmapWindow(dpy, c->win);
+        save_desktop(currentdesktop);
+        select_desktop(i);
+        fprintf(stdout, "\tcleaning desktop %d ...\n", i);
+        c = current;
+        while (c != NULL) {
+            remove_window(c->win);
+            XUnmapWindow(dpy, c->win);
+            update_all_windows();
+            c = current;
+        }
+        fprintf(stdout, "\tdone cleaning desktop %d\n", i);
+        desktops[i].head = NULL;
+        desktops[i].current = NULL;
+    }
+
+    fprintf(stdout, "\n\tkilling status bar script\n");
+    const Arg killarg = {.com = killstatusbarcmd};
+    spawn(killarg);
+
+	XUngrabKey(dpy, AnyKey, AnyModifier, root);
+	XFreeGC(dpy, gc);
+	XSync(dpy, False);
+	XSetInputFocus(dpy, PointerRoot, RevertToPointerRoot, CurrentTime);
+    fprintf(stdout, "cleanup! done\n");
 }
 
 void client_to_desktop(const Arg arg)
@@ -491,8 +528,8 @@ void propertynotify(XEvent *ev)
 
 void quit_wm()
 {
-    fprintf(stdout, "quitting...jk nm\n");
-    /* also, kill statusbar process? */
+    running = False;
+    fprintf(stdout, "\nquitting maxwelm...\n");
 }
 
 void remove_window(Window w)
@@ -565,7 +602,7 @@ void run()
 	XSync(dpy, False);
 
 	/* Credit to dwm for the O(1)-time event loop */
-	while (!XNextEvent(dpy, &ev))
+	while (running && !XNextEvent(dpy, &ev))
 		if (handler[ev.type])
 			handler[ev.type](&ev); /* call handler */
 }
@@ -719,24 +756,17 @@ void update_title(struct client *c)
 	if (c->name[0] == '\0') /* hack to mark broken Clients */
 		strcpy(c->name, broken);
     fprintf(stdout, "[%d|%s]", currentdesktop, c->name);
-    /*
-    char *wname = NULL;
-    if (c != NULL && XFetchName(dpy, c->win, &wname) > 0) {
-        fprintf(stdout, "[%d|%s]", currentdesktop, wname);
-        strncpy(c->name, wname, sizeof(c->name));
-        XFree(wname);
-    }
-    */
 }
 
 int main(void) 
 {
-    
     if(!(dpy = XOpenDisplay(0x0))) return 1;
 
     setup();
 
     run();
+
+    cleanup();
 
     XCloseDisplay(dpy);
 
