@@ -5,10 +5,8 @@
 #define MOD Mod1Mask
 
 /* Colors */
-#define FOCUS     "rgb:9a/cc/79"
-#define UNFOCUS   "rgb:1c/1c/1c"
-#define STATUS    "rgb:9a/cc/79"
-#define STATUSTXT "rgb:1c/1c/1c" 
+#define LIGHT "rgb:9a/cc/79"
+#define DARK  "rgb:1c/1c/1c"
 
 const char* dmenucmd[] = {"dmenu_run",NULL};
 const char* termcmd[]  = {"urxvt",NULL};

@@ -23,12 +23,12 @@ To do:
    [ ] top bar 
     |--[X] draw bar on screen
     |--[X] show desktop number
-    |--[ ] show focused window name
+    |--[X] show focused window name
     |--[ ] custom status text 
         |--[ ] PropertyNotify
         |--[ ] also, transient windows
    [ ] graceful quit WM
-   [ ] Alt + m - toggle?
-       If max then no border, else border
+   [ ] If max then no border, else border
+   [ ] Alt + m - toggle? save old x and y
    [ ] maximize mode?
    [ ] signal? why?

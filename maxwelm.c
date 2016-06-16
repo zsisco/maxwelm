@@ -84,12 +84,11 @@ static void update_all_windows();
 static void update_title(struct client *c);
 
 /* variables */
-static XWindowAttributes attr;
+static XWindowAttributes attr; /* should this be global? */
 static Colormap cmap;
 static XColor color;
-static unsigned int color_focus;
-static unsigned int color_unfocus;
-static unsigned int color_status;
+static unsigned int color_light;
+static unsigned int color_dark;
 static struct client *current; 
 static unsigned int currentdesktop;
 static struct desktop desktops[10];
@@ -259,28 +258,28 @@ void destroynotify(XEvent *ev)
     drawbar();
 }
 
-void drawbar()  /* need an updatebar() to not keep creating the same window? */
+void drawbar()  
 {
     fprintf(stdout, "\n\tdrawbar->\n");
 
     int status_w = strlen(status_text) * 6;
     int bar_w = screen_w - status_w;
     
-    Window win = XCreateSimpleWindow(dpy, root, 0, 0, screen_w, TOPBAR, 0, color_focus, color_focus);
+    Window win = XCreateSimpleWindow(dpy, root, 0, 0, screen_w, TOPBAR, 0, color_light, color_light);
     fprintf(stdout, "\t          create simple window\n");
 	XMapWindow(dpy, win);
     fprintf(stdout, "\t          map window\n");
-	XDrawRectangle(dpy, win, setcolor(STATUS), 0, 0, screen_w, TOPBAR - 1);
+	XDrawRectangle(dpy, win, setcolor(LIGHT), 0, 0, screen_w, TOPBAR - 1);
     fprintf(stdout, "\t          draw rectangle\n");
-	XFillRectangle(dpy, win, setcolor(STATUS), 0, 0, screen_w, TOPBAR);
+	XFillRectangle(dpy, win, setcolor(LIGHT), 0, 0, screen_w, TOPBAR);
     fprintf(stdout, "\t          fill rectangle\n");
 
     /* draw status text area */
-	XDrawRectangle(dpy, win, setcolor(STATUSTXT), screen_w - status_w, 0, status_w, TOPBAR - 1);
+	XDrawRectangle(dpy, win, setcolor(DARK), screen_w - status_w, 0, status_w, TOPBAR - 1);
     fprintf(stdout, "\t          draw rectangle\n");
-	XFillRectangle(dpy, win, setcolor(STATUSTXT), screen_w - status_w, 0, status_w, TOPBAR);
+	XFillRectangle(dpy, win, setcolor(DARK), screen_w - status_w, 0, status_w, TOPBAR);
     fprintf(stdout, "\t          fill rectangle\n");
-    XDrawString(dpy, win, setcolor(STATUS), screen_w - status_w + 1, TOPBAR - 3, status_text, strlen(status_text));
+    XDrawString(dpy, win, setcolor(LIGHT), screen_w - status_w + 1, TOPBAR - 3, status_text, strlen(status_text));
     fprintf(stdout, "\t          draw status text\n");
     
     /* load current window name */
@@ -293,25 +292,9 @@ void drawbar()  /* need an updatebar() to not keep creating the same window? */
 
     /* draw desktop window number */
     snprintf(barbuffer, bar_w, "[%d] [%s]", currentdesktop, (current == NULL ? "" : current->name));
-    XDrawString(dpy, win, setcolor(STATUSTXT), 5, TOPBAR - 3, barbuffer, strlen(barbuffer));
+    XDrawString(dpy, win, setcolor(DARK), 5, TOPBAR - 3, barbuffer, strlen(barbuffer));
     fprintf(stdout, "\t          draw bar text\n");
 
-    /*
-    char windowtext[bar_w];
-    snprintf(windowtext, bar_w, "%s", current->name);
-    */
-
-    /* draw current window name */
-    /*
-	XDrawRectangle(dpy, win, setcolor(STATUSTXT), screen_w / 4, 0, bar_w, TOPBAR - 1);
-    fprintf(stdout, "\t          draw rectangle\n");
-	XFillRectangle(dpy, win, setcolor(STATUSTXT), screen_w / 4, 0, bar_w, TOPBAR);
-    fprintf(stdout, "\t          fill rectangle\n");
-    XDrawString(dpy, win, setcolor(STATUSTXT), screen_w / 4, TOPBAR - 3, windowtext, strlen(windowtext));
-    fprintf(stdout, "\t          draw window text\n");
-    */
-
-    /*XSync(dpy, False);*/
     fprintf(stdout, "\tdrawbar<-\n\n");
 }
 
@@ -598,9 +581,8 @@ void setup()
     change_desktop(arg);
 
     /* init color stuff */
-    color_focus = getcolor(FOCUS);
-    color_unfocus = getcolor(UNFOCUS);
-    color_status = getcolor(STATUS);
+    color_light = getcolor(LIGHT);
+    color_dark = getcolor(DARK);
     cmap = DefaultColormap(dpy, screen);
     XGCValues val;
     val.font = XLoadFont(dpy, "fixed");
@@ -660,11 +642,11 @@ void update_all_windows()
     for (c = head; c; c = c->next) {
         if (current == c) {
             XSetWindowBorderWidth(dpy, c->win, 1);
-            XSetWindowBorder(dpy, c->win, color_focus);
+            XSetWindowBorder(dpy, c->win, color_light);
             XSetInputFocus(dpy, c->win, RevertToParent, CurrentTime);
             XRaiseWindow(dpy, c->win);
         } else {
-            XSetWindowBorder(dpy, c->win, color_unfocus);
+            XSetWindowBorder(dpy, c->win, color_dark);
         }
     }
 }
