@@ -29,9 +29,8 @@ To do:
         |--[X] PropertyNotify
         |--[X] get Atoms and stuff
    [X] graceful quit WM
+   [X] Alt + m - toggle. save old x and y
    [ ] BUG: moving windows between desktops crashes drawbar()
-   [ ] If max then no border, else border
-   [ ] Alt + m - toggle? save old x and y
    [ ] transient windows (dialog, popups)
    [ ] maximize mode?
    [ ] signal? why?

@@ -25,7 +25,7 @@ Alt + Button1, drag:   interactive window move
 Alt + Button3, drag:   interactive window resize
 Alt + h/j/k/l:         move window (left/down/up/right)
 Alt + Shift + h/j/k/l: resize window (left/down/up/right)
-Alt + m:               maximize focused window
+Alt + m:               toggle maximize for focused window
 Alt + Shift + w:       close focused window
 Alt + Tab:             focus next window
 Alt + Shift + Tab:     focus previous window

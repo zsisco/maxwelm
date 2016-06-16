@@ -44,6 +44,10 @@ struct client {
 
     Window win;
 	char name[256];
+    int old_x;
+    int old_y;
+    int old_w;
+    int old_h;
 };
 
 struct desktop {
@@ -133,6 +137,13 @@ void add_window(Window new_win)
         fprintf(stderr, "calloc error!\n");
         exit(1);
     }
+
+    static XWindowAttributes wa;
+    XGetWindowAttributes(dpy, new_win, &wa);
+    newclient->old_x = wa.x;
+    newclient->old_y = wa.y;
+    newclient->old_w = wa.width;
+    newclient->old_h = wa.height;
 
     newclient->win = new_win;
 
@@ -422,9 +433,9 @@ void maprequest(XEvent *ev)
     if (wa.override_redirect) /* for popups/dialogs */
         return;
 
-    add_window(mapev->window);
     /* Map window and maximize, true to name */
     XMapWindow(dpy, mapev->window);
+    add_window(mapev->window);
     max_win();
     update_all_titles();
     update_all_windows();
@@ -433,8 +444,20 @@ void maprequest(XEvent *ev)
 
 void max_win()
 {
-    if (current != NULL && current->win != None) 
-        XMoveResizeWindow(dpy, current->win, 0, TOPBAR, maxwin_w, maxwin_h);
+    if (current != NULL && current->win != None) {
+        static XWindowAttributes wa;
+        XGetWindowAttributes(dpy, current->win, &wa);
+        if (wa.width == maxwin_w && wa.height == maxwin_h) {
+            XMoveResizeWindow(dpy, current->win, current->old_x, 
+                    current->old_y, current->old_w, current->old_h);
+        } else {
+            current->old_x = wa.x;
+            current->old_y = wa.y;
+            current->old_w = wa.width;
+            current->old_h = wa.height;
+            XMoveResizeWindow(dpy, current->win, 0, TOPBAR, maxwin_w, maxwin_h);
+        }
+    }
 }
 
 void motionnotify(XEvent *ev)
