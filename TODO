@@ -25,9 +25,10 @@ To do:
     |--[X] draw bar on screen
     |--[X] show desktop number
     |--[X] show focused window name
-    |--[ ] custom status text 
-        |--[ ] PropertyNotify
-        |--[ ] also, transient windows
+    |--[X] custom status text 
+        |--[X] PropertyNotify
+        |--[X] get Atoms and stuff
+   [ ] transient windows
    [ ] bug: moving windows between desktops crashes drawbar()
    [ ] graceful quit WM
    [ ] If max then no border, else border

@@ -8,7 +8,7 @@
 #define LIGHT "rgb:9a/cc/79"
 #define DARK  "rgb:1c/1c/1c"
 
-static char* colors[10] = {  /* please initialize 10 */
+static char* colors[10] = {  /* initialize 10 colors */
     "rgb:9a/cc/79",
     "rgb:9a/cc/79",
     "rgb:9a/79/cc",
@@ -21,6 +21,7 @@ static char* colors[10] = {  /* please initialize 10 */
     "rgb:fa/fc/f9",
 };
 
+const char* statusbarcmd[] = {"./statusbar.sh",NULL};  /* do not remove this line */
 const char* dmenucmd[] = {"dmenu_run",NULL};
 const char* termcmd[]  = {"urxvt",NULL};
 
@@ -30,7 +31,7 @@ static struct key keys[] = {
     { MOD|ShiftMask,   XK_w,      close_win,         {NULL}},
     { MOD,             XK_Tab,    next_win,          {NULL}},
     { MOD|ShiftMask,   XK_Tab,    prev_win,          {NULL}},
-    { MOD|ShiftMask,   XK_t,      quit_wm,           {NULL}},
+    { MOD|ControlMask, XK_t,      quit_wm,           {NULL}},
     /* run commands */
     { MOD,             XK_p,      spawn,             {.com = dmenucmd}},
     { MOD,             XK_Return, spawn,             {.com = termcmd}},

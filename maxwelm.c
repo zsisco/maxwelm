@@ -13,7 +13,9 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <X11/keysym.h>
+#include <X11/Xatom.h>
 #include <X11/Xlib.h>
+#include <X11/Xutil.h>
 #include <X11/XKBlib.h>
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -60,6 +62,7 @@ static void configurerequest(XEvent *e);
 static void destroynotify(XEvent *ev);
 static void drawbar();
 static unsigned long getcolor(const char* color);
+static Bool gettextprop(Window w, Atom atom, char *text, unsigned int size);
 static void grabinput();
 static void keypress(XEvent *ev);
 static void maprequest(XEvent *ev);
@@ -68,6 +71,7 @@ static void motionnotify(XEvent *ev);
 static void move_win(const Arg arg);
 static void next_win();
 static void prev_win();
+static void propertynotify(XEvent *ev);
 static void quit_wm();
 static void remove_window(Window w);
 static void resize_win(const Arg arg);
@@ -81,6 +85,7 @@ static void sigchld(int unused);
 static void spawn(const Arg arg);
 static void update_all_titles();
 static void update_all_windows();
+static void update_status(void);
 static void update_title(struct client *c);
 
 /* variables */
@@ -101,9 +106,11 @@ static void (*handler[LASTEvent]) (XEvent *) = {
 	[DestroyNotify] = destroynotify,
 	[KeyPress] = keypress,
 	[MapRequest] = maprequest,
-	[MotionNotify] = motionnotify
+	[MotionNotify] = motionnotify,
+    [PropertyNotify] = propertynotify
 };
 static struct client *head; 
+static Atom NetWMName;
 static Window root;
 static int screen;
 static int screen_w;
@@ -291,7 +298,7 @@ void drawbar()
 
     char barbuffer[bar_w]; 
 
-    /* draw desktop window number */
+    /* draw desktop number and window name */
     snprintf(barbuffer, bar_w, "[%d] [%s]", currentdesktop, (current == NULL ? "" : current->name));
     XDrawString(dpy, win, setcolor(DARK), 5, TOPBAR - 3, barbuffer, strlen(barbuffer));
     fprintf(stdout, "\t          draw bar text\n");
@@ -310,6 +317,30 @@ unsigned long getcolor(const char* color)
     }
 
     return c.pixel;
+}
+
+Bool gettextprop(Window w, Atom atom, char *text, unsigned int size) {
+	char **list = NULL;
+	int n;
+	XTextProperty name;
+
+	if (!text || size == 0)
+		return False;
+	text[0] = '\0';
+	XGetTextProperty(dpy, w, &name, atom);
+	if (!name.nitems)
+		return False;
+	if (name.encoding == XA_STRING) {
+		strncpy(text, (char *)name.value, size - 1);
+    } else {
+		if (XmbTextPropertyToTextList(dpy, &name, &list, &n) >= Success && n > 0 && *list) {
+			strncpy(text, *list, size - 1);
+			XFreeStringList(list);
+		}
+	}
+	text[size - 1] = '\0';
+	XFree(name.value);
+	return True;
 }
 
 void grabinput() 
@@ -444,6 +475,32 @@ void prev_win()
     }
 }
 
+void propertynotify(XEvent *ev)
+{
+    fprintf(stdout, "\nPropertyNotify\n");
+    XPropertyEvent *propev = &ev->xproperty;
+    struct client *c = NULL;
+    struct client *tmp;
+
+    for (tmp = head; tmp; tmp = tmp->next) 
+        if (tmp->win == propev->window) 
+            c = tmp;
+
+    if ((propev->window == root) && (propev->atom == XA_WM_NAME)) {
+        fprintf(stdout, "\tupdate status\n");
+        update_status();
+        drawbar();
+    } else if (propev->state == PropertyDelete) {
+        return; /*ignore*/
+    } else if (c) {
+        if(propev->atom == XA_WM_NAME || propev->atom == NetWMName) {
+            fprintf(stdout, "\tupdate title\n");
+            update_title(c);
+            drawbar();
+        }
+    }
+}
+
 void quit_wm()
 {
     fprintf(stdout, "quitting...jk nm\n");
@@ -570,6 +627,9 @@ void setup()
     head = NULL;
     current = NULL;
 
+    /* EWMH */
+    NetWMName = XInternAtom(dpy, "_NET_WM_NAME", False);
+
     int i;
     for (i = 0; i < 10; i++) {
         desktops[i].head = head;
@@ -589,7 +649,11 @@ void setup()
     val.font = XLoadFont(dpy, "fixed");
     gc = XCreateGC(dpy, root, GCFont, &val);
 
+    /* init status bar text */
     strncpy(status_text, "maxwelm\0", sizeof(status_text));
+    const Arg statusarg = {.com = statusbarcmd};
+    spawn(statusarg);
+
     drawbar();
 
     XSelectInput(dpy,root,SubstructureNotifyMask|SubstructureRedirectMask|PropertyChangeMask);
@@ -652,14 +716,28 @@ void update_all_windows()
     }
 }
 
+void update_status(void) {
+    if(!gettextprop(root, XA_WM_NAME, status_text, sizeof(status_text)))
+        strcpy(status_text, "maxwelm");
+}
+
 void update_title(struct client *c) 
 {
+    static const char broken[] = "broken";
+
+	if (!gettextprop(c->win, NetWMName, c->name, sizeof c->name))
+		gettextprop(c->win, XA_WM_NAME, c->name, sizeof c->name);
+	if (c->name[0] == '\0') /* hack to mark broken Clients */
+		strcpy(c->name, broken);
+    fprintf(stdout, "[%d|%s]", currentdesktop, c->name);
+    /*
     char *wname = NULL;
     if (c != NULL && XFetchName(dpy, c->win, &wname) > 0) {
         fprintf(stdout, "[%d|%s]", currentdesktop, wname);
         strncpy(c->name, wname, sizeof(c->name));
         XFree(wname);
     }
+    */
 }
 
 int main(void) 
