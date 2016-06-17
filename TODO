@@ -32,9 +32,9 @@ To do:
    [X] Alt + m - toggle. save old x and y
    [X] BUG: moving windows between desktops crashes drawbar()
    [X] BUG: new/private firefox windows are misplaced for maximized
-   [ ] prevent moving windows above status bar
+   [X] prevent moving windows above status bar
    [ ] transient windows (dialog, popups)
-   [ ] improvements:
+   [ ] enhancements:
     |--[ ] display all window titles on bar?
     |--[ ] "snap to" side-by-side windows?
         |--[ ] split screen with tabbable windows?
