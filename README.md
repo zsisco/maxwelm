@@ -15,9 +15,13 @@ The main idea is to have a window manager suitable for small screens (and slower
 - All configuration is done in `config.h` (mostly key bindings, colors, and custom commands)
 - Custom status text is set by `xsetroot -name $status` (similar to dwm) where `$status` is a string variable. A sample shell script is provided -- `statusbar.sh`. It may use programs not installed on your machine; change it to output whatever you like. 
 
-####Dependencies:
+####Dependencies
 - Xlib.
 - dmenu (optional).
+
+####Installation
+- `$ vi config.h`
+- `# make install clean`
 
 ####Functionality and default hotkeys:
 ```
