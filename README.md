@@ -35,3 +35,8 @@ Alt + Enter:           spawn terminal
 Alt + p:               spawn dmenu
 Alt + Control + t:     quit maxwelm
 ```
+
+####Screenshots
+![floating windows](http://imgur.com/qpB3On5 "floating windows")
+
+![maximized window](http://imgur.com/o1xECpD "maximized window")
