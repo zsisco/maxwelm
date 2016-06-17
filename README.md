@@ -37,6 +37,6 @@ Alt + Control + t:     quit maxwelm
 ```
 
 ####Screenshots
-![floating windows](http://imgur.com/qpB3On5 "floating windows")
+![floating windows](http://i.imgur.com/qpB3On5.png "floating windows")
 
-![maximized window](http://imgur.com/o1xECpD "maximized window")
+![maximized window](http://i.imgur.com/o1xECpD.png "maximized window")
