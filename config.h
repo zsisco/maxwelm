@@ -7,16 +7,16 @@
 /* Colors */
 #define UNFOCUS "rgb:1c/1c/1c"
 static char* focuscolors[10] = {  /* initialize 10 colors */
-    "rgb:9a/cc/79",
+    "rgb:cc/cc/c6",
     "rgb:9a/cc/79",
     "rgb:79/9a/cc",
     "rgb:9a/79/cc",
-    "rgb:79/cc/9a",
+    "rgb:cb/8d/c4",
     "rgb:cc/79/9a",
     "rgb:cc/9a/79",
-    "rgb:9a/cc/79",
-    "rgb:9a/cc/79",
-    "rgb:fa/fc/f9",
+    "rgb:d6/aa/55",
+    "rgb:e4/d5/61",
+    "rgb:89/9c/a1",
 };
 
 /* 
@@ -32,8 +32,8 @@ static char* focuscolors[10] = {  /* initialize 10 colors */
  */
 const char* statusbarcmd[] = {STATUS_BAR_SCRIPT, NULL};          /* do not remove this line */
 const char* killstatusbarcmd[] = {"killall", STATUS_BAR_SCRIPT}; /* do not remove this line */
-const char* dmenucmd[] = {"dmenu_run",NULL};
-const char* termcmd[]  = {"urxvt",NULL};
+const char* dmenucmd[] = {"dmenu_run",NULL};       /* replace with another launcher program */
+const char* termcmd[]  = {"urxvt",NULL};          /* replace with another terminal emulator */
 
 static struct key keys[] = {
     /*MOD              KEY        FUNCTION           ARGS */

@@ -95,7 +95,7 @@ static void update_status(void);
 static void update_title(struct client *c);
 
 /* variables */
-static XWindowAttributes attr; /* should this be global? */
+static XWindowAttributes attr;
 static Colormap cmap;
 static XColor color;
 static unsigned int color_light;
