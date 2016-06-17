@@ -20,7 +20,7 @@
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define LENGTH(X) (sizeof(X) / sizeof(*X))
-#define RESIZER 15
+#define RESIZER 20
 #define TOPBAR 15
 #define WINBORDER 1
 
@@ -491,11 +491,11 @@ void move_win(const Arg arg)
             break;
         case DOWN:
             x = attr.x;
-            y = (screen_h - attr.height < attr.y + RESIZER ? screen_h - attr.height: attr.y + RESIZER);
+            y = (screen_h - attr.height < attr.y + RESIZER ? screen_h - attr.height : attr.y + RESIZER);
             break;
         case UP:
             x = attr.x;
-            y = MAX(1, attr.y - RESIZER);
+            y = MAX(TOPBAR, attr.y - RESIZER);
             break;
         case RIGHT:
             x = (screen_w - attr.width < attr.x + RESIZER ? screen_w - attr.width : attr.x + RESIZER);
@@ -604,7 +604,7 @@ void resize_win(const Arg arg)
             break;
         case DOWN:
             w = attr.width;
-            h = (screen_h - attr.y < attr.height + RESIZER ? screen_h - attr.y: attr.height + RESIZER);
+            h = (screen_h - attr.y < attr.height + RESIZER ? screen_h - attr.y : attr.height + RESIZER);
             break;
         case UP:
             w = attr.width;

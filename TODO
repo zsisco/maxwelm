@@ -31,7 +31,10 @@ To do:
    [X] graceful quit WM
    [X] Alt + m - toggle. save old x and y
    [X] BUG: moving windows between desktops crashes drawbar()
-   [ ] BUG: new/private firefox windows are misplaced for maximized
+   [X] BUG: new/private firefox windows are misplaced for maximized
    [ ] prevent moving windows above status bar
    [ ] transient windows (dialog, popups)
-   [ ] toggle window modes? monocle, floating.
+   [ ] improvements:
+    |--[ ] display all window titles on bar?
+    |--[ ] "snap to" side-by-side windows?
+        |--[ ] split screen with tabbable windows?
