@@ -449,7 +449,8 @@ void max_win()
     if (current != NULL && current->win != None) {
         static XWindowAttributes wa;
         XGetWindowAttributes(dpy, current->win, &wa);
-        if (wa.width == maxwin_w && wa.height == maxwin_h) {
+        if (wa.width == maxwin_w && wa.height == maxwin_h
+                && wa.x == 0 && wa.y == TOPBAR) {
             XMoveResizeWindow(dpy, current->win, current->old_x, 
                     current->old_y, current->old_w, current->old_h);
         } else {
