@@ -1,4 +1,4 @@
-CFLAGS+= -pedantic -Wall
+CFLAGS+= -Wall
 LDADD+= -lX11 -lm
 LDFLAGS=
 EXEC=maxwelm
