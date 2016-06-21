@@ -33,8 +33,19 @@ To do:
    [X] BUG: moving windows between desktops crashes drawbar()
    [X] BUG: new/private firefox windows are misplaced for maximized
    [X] prevent moving windows above status bar
-   [ ] transient windows (dialog, popups)
+   [ ] BUG: frequent WM crashing with firefox...can't quite diagnose
+       firefox creates a window that isn't kept track off
    [ ] enhancements:
-    |--[ ] display all window titles on bar?
+    |--[ ] display all window titles on bar? or display number of windows on desktop?
     |--[ ] "snap to" side-by-side windows?
-        |--[ ] split screen with tabbable windows?
+    |   |--[ ] split screen with tabbable windows?
+    |--[ ] mod + shift + m  - full screen (max and disregard borders, tool bars)
+    |--[ ] transient windows (dialog, popups)
+   [ ] re-write in XCB?
+   [ ] modularity considerations:
+    |  maybe it's better design and fits more with the unix philosophy to remove aspects of maxwelm that are NOT window management?
+    |--[ ] remove the status bar in favor of a "real" bar program like bar, dzen, conky?
+    |      this can work so long as maxwelm send the right info.
+    |------[ ] test maxwelm with lemonboy bar
+    |--[ ] remove keybindings, hand that off to a real keybinding program (sxhkd)
+   [ ] think about workflow on small displays and how maxwelm can differentiate itself from other WM's

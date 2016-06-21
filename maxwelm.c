@@ -322,8 +322,8 @@ void drawbar()
 {
     fprintf(stdout, "\n\tdrawbar->\n");
 
-    int status_w = strlen(status_text) * 6;
-    int bar_w = screen_w - status_w;
+    int status_w = strlen(status_text) * 6; /* right side of bar */
+    int bar_w = screen_w - status_w;        /* left side of bar */
     
     Window win = XCreateSimpleWindow(dpy, root, 0, 0, screen_w, TOPBAR, 0, color_light, color_light);
     fprintf(stdout, "\t          create simple window\n");
@@ -348,10 +348,21 @@ void drawbar()
         fprintf(stdout, "\n\t          update title\n");
     }
 
+    /* get count of open windows */
+    struct client *tmp;
+    int totalwin = 0;
+    int currentwin = 0;
+    for (tmp = head; tmp; tmp = tmp->next) {
+        totalwin = totalwin + 1;
+        if (tmp == current)
+            currentwin = totalwin;
+    }
+
+
     char barbuffer[bar_w]; 
 
     /* draw desktop number and window name */
-    snprintf(barbuffer, bar_w, "[%d] [%s]", currentdesktop, (current == NULL ? "" : current->name));
+    snprintf(barbuffer, bar_w, "[D:%d|W:%d/%d] [%s]", currentdesktop, currentwin, totalwin, (current == NULL ? "" : current->name));
     XDrawString(dpy, win, setcolor(UNFOCUS), 5, TOPBAR - 3, barbuffer, strlen(barbuffer));
     fprintf(stdout, "\t          draw bar text\n");
 
